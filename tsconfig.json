@@ -1,6 +1,23 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
-  }
+    "target": "es6",
+    "module": "commonjs",
+    "jsx": "react-native",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": false,
+    "baseUrl": "./src",
+    "paths": {
+      "@assets/*": [
+        "../assets/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "babel.config.js"
+  ]
 }
