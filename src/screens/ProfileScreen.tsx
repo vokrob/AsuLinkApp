@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, Image, TouchableOpacity, ScrollView, TextInput, Modal, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView, TextInput, Modal, Alert, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import RightSideMenu from '../components/Menu/RightSideMenu';
@@ -151,8 +152,7 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <StatusBar backgroundColor="#2874A6" barStyle="light-content" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar
         title="Профиль"
         onMenuPress={toggleRightMenu}

@@ -1,13 +1,20 @@
 import React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from './src/contexts/ThemeContext';
+import StatusBarComponent from './src/components/StatusBarComponent';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppNavigator />
-    </ThemeProvider>
+    <View style={styles.container}>
+      <StatusBarComponent />
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <AppNavigator />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </View>
   );
 }
 
@@ -15,9 +22,7 @@ const styles = StyleSheet.create(
   {
     container: {
       flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
+      backgroundColor: '#2874A6',
     },
   }
 );

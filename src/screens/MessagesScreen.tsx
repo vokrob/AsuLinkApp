@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, FlatList, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, FlatList, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
@@ -226,11 +227,10 @@ const MessagesScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <StatusBar backgroundColor="#2874A6" barStyle="light-content" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
+      <HeaderBar title="Сообщения" onMenuPress={() => { }} />
       {activeView === 'chats' ? (
         <>
-          <HeaderBar title="Сообщения" onMenuPress={() => { }} />
           {renderChatsList()}
         </>
       ) : (

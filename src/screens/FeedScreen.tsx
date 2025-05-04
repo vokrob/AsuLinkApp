@@ -171,8 +171,7 @@ const FeedScreen = () => {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaView style={styles.safeArea}>
-                <StatusBar backgroundColor="#2874A6" barStyle="light-content" />
+            <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
                 <HeaderBar
                     title="Новости"
                     showNotification={true}

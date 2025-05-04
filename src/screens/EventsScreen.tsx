@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
@@ -55,8 +56,7 @@ const EventsScreen = () => {
   });
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <StatusBar backgroundColor="#2874A6" barStyle="light-content" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar title="События" onMenuPress={() => { }} />
 
       <View style={styles.tabContainer}>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, Image, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
@@ -316,8 +317,7 @@ const MapScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <StatusBar backgroundColor="#2874A6" barStyle="light-content" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar title="Карта корпусов" onMenuPress={() => { }} />
 
       {activeView === 'buildings' ? renderBuildingsList() : renderRoomsList()}

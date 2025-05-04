@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface HeaderBarProps {
@@ -90,12 +90,12 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#2874A6',
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingVertical: 15,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
+    width: '100%',
   },
   headerTitle: {
     color: '#fff',
