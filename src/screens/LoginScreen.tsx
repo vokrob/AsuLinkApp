@@ -14,8 +14,8 @@ const LoginScreen = ({ navigation }: any) => {
     );
 
     const handleLogin = () => {
-        if (username === 'borkov.43052' && password === '12345') {
-            navigation.replace('Feed');
+        if (username === 'b' && password === '1') {
+            navigation.replace('Main');
         } else {
             Alert.alert('Ошибка', 'Неправильное имя пользователя или пароль');
         }
