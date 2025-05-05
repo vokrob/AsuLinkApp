@@ -31,57 +31,59 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   return (
     <View style={styles.header}>
-      <View style={styles.headerLeft}>
-        {showBackButton && onBackPress && (
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={onBackPress}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-        )}
-        {profileAvatar && (
-          <TouchableOpacity onPress={onProfilePress}>
-            <Image
-              source={profileAvatar}
-              style={styles.avatar}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-      <Text style={styles.headerTitle}>{title}</Text>
-      <View style={styles.headerRight}>
-        {onAddPress && (
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={onAddPress}
-          >
-            <Ionicons name="add-circle" size={26} color="#fff" />
-          </TouchableOpacity>
-        )}
-        {showNotification && (
-          <TouchableOpacity
-            style={styles.notificationButton}
-            onPress={onNotificationPress}
-          >
-            <Ionicons name="notifications" size={24} color="#fff" />
-            {notificationCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>
-                  {notificationCount > 99 ? '99+' : notificationCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        )}
-        {showMenuButton && (
-          <TouchableOpacity
-            style={styles.menuButton}
-            onPress={onMenuPress}
-          >
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
-        )}
+      <View style={styles.headerContent}>
+        <View style={styles.headerLeft}>
+          {showBackButton && onBackPress && (
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={onBackPress}
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+          {profileAvatar && (
+            <TouchableOpacity onPress={onProfilePress} style={styles.avatarContainer}>
+              <Image
+                source={profileAvatar}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.headerTitle}>{title}</Text>
+        </View>
+        <View style={styles.headerRight}>
+          {onAddPress && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={onAddPress}
+            >
+              <Ionicons name="add-circle" size={26} color="#fff" />
+            </TouchableOpacity>
+          )}
+          {showNotification && (
+            <TouchableOpacity
+              style={styles.notificationButton}
+              onPress={onNotificationPress}
+            >
+              <Ionicons name="notifications" size={24} color="#fff" />
+              {notificationCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+          {showMenuButton && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={onMenuPress}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -91,16 +93,19 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#2874A6',
     paddingVertical: 15,
+    width: '100%',
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
-    width: '100%',
   },
   headerTitle: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
+    marginLeft: 10,
   },
   menuButton: {
     padding: 5,
@@ -119,9 +124,9 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   headerLeft: {
-    minWidth: 40,
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   headerRight: {
     flexDirection: 'row',
@@ -145,6 +150,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  avatarContainer: {
+    marginRight: 5,
   },
   avatar: {
     width: 32,

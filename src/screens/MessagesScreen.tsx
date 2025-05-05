@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, FlatList, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useLayoutEffect, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, StatusBar, FlatList, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, BackHandler, Keyboard, Dimensions, TouchableWithoutFeedback, ScrollView, KeyboardEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -12,6 +14,7 @@ interface Chat {
   lastMessage: string;
   timestamp: string;
   unread: number;
+  lastSeen?: string;
 }
 
 interface Message {
@@ -25,46 +28,11 @@ interface Message {
 
 const MessagesScreen = () => {
   const { theme } = useTheme();
+  const navigation = useNavigation();
   const [activeView, setActiveView] = useState<'chats' | 'conversation'>('chats');
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messageText, setMessageText] = useState('');
-
-  const chats: Chat[] = [
-    {
-      id: '1',
-      name: 'Иванов Сергей Петрович',
-      avatar: 'https://randomuser.me/api/portraits/men/41.jpg',
-      lastMessage: 'Добрый день! Можете скинуть материалы к завтрашней лекции?',
-      timestamp: '10:30',
-      unread: 2
-    },
-    {
-      id: '2',
-      name: 'Староста группы 571',
-      avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
-      lastMessage: 'Завтра пары отменяются! Преподаватель заболел.',
-      timestamp: 'Вчера',
-      unread: 0
-    },
-    {
-      id: '3',
-      name: 'Научный руководитель',
-      avatar: 'https://randomuser.me/api/portraits/men/91.jpg',
-      lastMessage: 'Посмотрите мои комментарии к вашей работе. Нужно доработать третью главу.',
-      timestamp: '23.05',
-      unread: 1
-    },
-    {
-      id: '4',
-      name: 'Студенческий совет',
-      avatar: 'https://randomuser.me/api/portraits/men/29.jpg',
-      lastMessage: 'Приглашаем всех на студенческий концерт в субботу!',
-      timestamp: '22.05',
-      unread: 0
-    }
-  ];
-
-  const messages: Message[] = [
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '101',
       chatId: '1',
@@ -97,22 +65,192 @@ const MessagesScreen = () => {
       sent: true,
       read: false
     }
+  ]);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+  const flatListRef = useRef<FlatList>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const windowHeight = Dimensions.get('window').height;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: {
+        display: activeView === 'conversation' ? 'none' : 'flex',
+      }
+    });
+  }, [navigation, activeView]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (activeView === 'conversation') {
+          handleBackToChats();
+          return true;
+        }
+        return false;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      const unsubscribeNavListener = navigation.addListener('beforeRemove', (e) => {
+        if (activeView === 'conversation') {
+          e.preventDefault();
+          handleBackToChats();
+        }
+      });
+
+      return () => {
+        subscription.remove();
+        unsubscribeNavListener();
+      };
+    }, [activeView, navigation])
+  );
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const chats: Chat[] = [
+    {
+      id: '1',
+      name: 'Иванов Сергей Петрович',
+      avatar: 'https://randomuser.me/api/portraits/men/41.jpg',
+      lastMessage: 'Добрый день! Можете скинуть материалы к завтрашней лекции?',
+      timestamp: '10:30',
+      unread: 2,
+      lastSeen: 'был в сети вчера в 23:45'
+    },
+    {
+      id: '2',
+      name: 'Староста группы 571',
+      avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+      lastMessage: 'Завтра пары отменяются! Преподаватель заболел.',
+      timestamp: 'Вчера',
+      unread: 0,
+      lastSeen: 'была в сети 2 часа назад'
+    },
+    {
+      id: '3',
+      name: 'Научный руководитель',
+      avatar: 'https://randomuser.me/api/portraits/men/91.jpg',
+      lastMessage: 'Посмотрите мои комментарии к вашей работе. Нужно доработать третью главу.',
+      timestamp: '23.05',
+      unread: 1,
+      lastSeen: 'онлайн'
+    },
+    {
+      id: '4',
+      name: 'Студенческий совет',
+      avatar: 'https://randomuser.me/api/portraits/men/29.jpg',
+      lastMessage: 'Приглашаем всех на студенческий концерт в субботу!',
+      timestamp: '22.05',
+      unread: 0,
+      lastSeen: 'был в сети 21.05 в 15:30'
+    }
   ];
 
   const handleChatSelect = (chat: Chat) => {
     setSelectedChat(chat);
     setActiveView('conversation');
+    navigation.setOptions({
+      tabBarStyle: { display: 'none' }
+    });
   };
 
-  const handleSendMessage = () => {
-    if (!messageText.trim() || !selectedChat) return;
-    setMessageText('');
+  const handleBackToChats = () => {
+    setActiveView('chats');
+    navigation.setOptions({
+      tabBarStyle: { display: 'flex' }
+    });
   };
 
   const filteredMessages = messages.filter(message => {
     if (!selectedChat) return false;
     return message.chatId === selectedChat.id;
   });
+
+  const scrollToBottom = () => {
+    if (flatListRef.current && filteredMessages.length > 0) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (!messageText.trim() || !selectedChat) return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      chatId: selectedChat.id,
+      text: messageText.trim(),
+      timestamp: new Date().toLocaleTimeString().slice(0, 5),
+      sent: true,
+      read: false
+    };
+
+    setMessages([...messages, newMessage]);
+    setMessageText('');
+
+    setTimeout(scrollToBottom, 100);
+  };
+
+  useEffect(() => {
+    if (filteredMessages.length > 0) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [filteredMessages.length]);
+
+  useEffect(() => {
+    function onKeyboardShow(e: KeyboardEvent) {
+      const keyboardHeight = e.endCoordinates.height;
+      setKeyboardHeight(keyboardHeight);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+
+    function onKeyboardHide() {
+      setKeyboardHeight(0);
+    }
+
+    const showListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      onKeyboardShow
+    );
+    const hideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      onKeyboardHide
+    );
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (filteredMessages.length > 0) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: false });
+      }, 100);
+    }
+  }, [filteredMessages.length]);
 
   const renderChatsList = () => (
     <FlatList
@@ -155,92 +293,124 @@ const MessagesScreen = () => {
     />
   );
 
-  const renderConversation = () => (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.conversationContainer}
-      keyboardVerticalOffset={100}
-    >
-      <View style={styles.conversationHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => setActiveView('chats')}
-        >
-          <AntDesign name="arrowleft" size={24} color="#2874A6" />
-        </TouchableOpacity>
-        <View style={styles.profileInfo}>
-          <Image
-            source={{ uri: selectedChat?.avatar }}
-            style={styles.smallAvatar}
-            defaultSource={{ uri: 'https://via.placeholder.com/40x40' }}
-          />
-          <Text style={styles.profileName}>{selectedChat?.name}</Text>
-        </View>
-      </View>
+  const renderConversation = () => {
+    const windowHeight = Dimensions.get('window').height;
+    const bottomPosition = keyboardHeight > 0 ? keyboardHeight : 0;
 
-      <FlatList
-        data={filteredMessages}
-        keyExtractor={(item) => item.id}
-        inverted={false}
-        contentContainerStyle={styles.messagesContainer}
-        renderItem={({ item }) => (
-          <View style={[
-            styles.messageBubble,
-            item.sent ? styles.sentMessage : styles.receivedMessage
-          ]}>
-            <Text style={styles.messageText}>{item.text}</Text>
-            <View style={styles.messageFooter}>
-              <Text style={styles.messageTime}>{item.timestamp}</Text>
-              {item.sent && (
-                <AntDesign
-                  name={item.read ? "check" : "clockcircleo"}
-                  size={12}
-                  color={item.read ? "#5BC236" : "#999"}
-                  style={styles.messageStatus}
-                />
-              )}
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={styles.conversationHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={handleBackToChats}
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <View style={styles.profileInfo}>
+            <Image
+              source={{ uri: selectedChat?.avatar }}
+              style={styles.smallAvatar}
+              defaultSource={{ uri: 'https://via.placeholder.com/40x40' }}
+            />
+            <View style={styles.profileTextContainer}>
+              <Text style={styles.profileName}>{selectedChat?.name}</Text>
+              <Text style={styles.lastSeenText}>{selectedChat?.lastSeen || 'не в сети'}</Text>
             </View>
           </View>
-        )}
-      />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.messageInput}
-          placeholder="Сообщение..."
-          value={messageText}
-          onChangeText={setMessageText}
-          multiline
-        />
-        <TouchableOpacity
-          style={[
-            styles.sendButton,
-            !messageText.trim() && styles.disabledButton
-          ]}
-          onPress={handleSendMessage}
-          disabled={!messageText.trim()}
+        <ScrollView
+          ref={scrollViewRef}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: Math.max(70, bottomPosition) }}
         >
-          <Ionicons name="send" size={24} color="white" />
-        </TouchableOpacity>
+          {filteredMessages.map(item => (
+            <View
+              key={item.id}
+              style={[
+                styles.messageBubble,
+                item.sent ? styles.sentMessage : styles.receivedMessage
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  !item.sent && styles.receivedMessageText
+                ]}
+              >
+                {item.text}
+              </Text>
+              <View style={styles.messageFooter}>
+                <Text
+                  style={[
+                    styles.messageTime,
+                    item.sent && { color: '#e0e0e0' }
+                  ]}
+                >
+                  {item.timestamp}
+                </Text>
+                {item.sent && (
+                  <AntDesign
+                    name={item.read ? "check" : "clockcircleo"}
+                    size={12}
+                    color={item.read ? "#ffffff" : "#e0e0e0"}
+                    style={styles.messageStatus}
+                  />
+                )}
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+
+        <View style={[
+          styles.extremeFixedInput,
+          { bottom: bottomPosition }
+        ]}>
+          <TextInput
+            style={styles.messageInput}
+            placeholder="Сообщение..."
+            value={messageText}
+            onChangeText={setMessageText}
+            multiline
+            returnKeyType="send"
+            blurOnSubmit={false}
+            onSubmitEditing={messageText.trim() ? handleSendMessage : undefined}
+          />
+          <TouchableOpacity
+            style={[
+              styles.sendButton,
+              !messageText.trim() && styles.disabledButton
+            ]}
+            onPress={handleSendMessage}
+            disabled={!messageText.trim()}
+          >
+            <Ionicons name="send" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
-    </KeyboardAvoidingView>
-  );
+    );
+  };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
-      <HeaderBar title="Сообщения" onMenuPress={() => { }} />
-      {activeView === 'chats' ? (
-        <>
-          {renderChatsList()}
-        </>
-      ) : (
-        renderConversation()
-      )}
-    </SafeAreaView>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
+        {activeView === 'chats' ? (
+          <>
+            <HeaderBar title="Сообщения" onMenuPress={() => { }} />
+            {renderChatsList()}
+          </>
+        ) : (
+          renderConversation()
+        )}
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
@@ -300,8 +470,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  conversationContainer: {
+  safeContainer: {
     flex: 1,
+    backgroundColor: '#fff',
+    position: 'relative',
   },
   conversationHeader: {
     flexDirection: 'row',
@@ -314,10 +486,21 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 5,
     marginRight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backText: {
+    color: 'white',
+    marginLeft: 5,
+    fontSize: 16,
   },
   profileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+  },
+  profileTextContainer: {
+    justifyContent: 'center',
   },
   smallAvatar: {
     width: 40,
@@ -330,8 +513,54 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  lastSeenText: {
+    color: '#e0e0e0',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  keyboardView: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  messagesBox: {
+    flex: 1,
+  },
+  flatListStyle: {
+    flex: 1,
+  },
   messagesContainer: {
     padding: 15,
+    paddingBottom: 20,
+  },
+  inputBox: {
+    flexDirection: 'row',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#f9f9f9',
+  },
+  androidContentContainer: {
+    flex: 1,
+  },
+  androidInputBox: {
+    flexDirection: 'row',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#f9f9f9',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    elevation: 5,
+  },
+  messageInput: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   messageBubble: {
     maxWidth: '80%',
@@ -340,7 +569,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sentMessage: {
-    backgroundColor: '#DCF8C6',
+    backgroundColor: '#5181B8',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 0,
   },
@@ -351,6 +580,10 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+    color: '#fff',
+  },
+  receivedMessageText: {
+    color: '#000',
   },
   messageFooter: {
     flexDirection: 'row',
@@ -360,25 +593,10 @@ const styles = StyleSheet.create({
   },
   messageTime: {
     fontSize: 12,
-    color: '#666',
+    color: '#e0e0e0',
   },
   messageStatus: {
     marginLeft: 5,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: '#f9f9f9',
-  },
-  messageInput: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    maxHeight: 100,
   },
   sendButton: {
     width: 40,
@@ -391,6 +609,38 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#9CC3E5',
+  },
+  inputFixedContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#f9f9f9',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 10,
+  },
+  extremeFixedInput: {
+    flexDirection: 'row',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#f9f9f9',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    elevation: 999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
 });
 
