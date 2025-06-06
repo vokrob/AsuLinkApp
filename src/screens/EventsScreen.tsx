@@ -16,7 +16,7 @@ interface Event {
 }
 
 const EventsScreen = () => {
-  const { theme } = useTheme();
+  const { theme, isDarkTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<'all' | 'university' | 'personal'>('all');
   const [showAddEvent, setShowAddEvent] = useState(false);
 
@@ -59,24 +59,36 @@ const EventsScreen = () => {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar title="События" onMenuPress={() => { }} />
 
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, { borderBottomColor: theme.border }]}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'all' && [styles.activeTab, { borderBottomColor: theme.primary }]]}
           onPress={() => setActiveTab('all')}
         >
-          <Text style={activeTab === 'all' ? styles.activeTabText : styles.tabText}>Все</Text>
+          <Text style={[
+            styles.tabText, 
+            { color: theme.secondaryText },
+            activeTab === 'all' && { color: theme.primary, fontWeight: 'bold' }
+          ]}>Все</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'university' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'university' && [styles.activeTab, { borderBottomColor: theme.primary }]]}
           onPress={() => setActiveTab('university')}
         >
-          <Text style={activeTab === 'university' ? styles.activeTabText : styles.tabText}>Университет</Text>
+          <Text style={[
+            styles.tabText, 
+            { color: theme.secondaryText },
+            activeTab === 'university' && { color: theme.primary, fontWeight: 'bold' }
+          ]}>Университет</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'personal' && styles.activeTab]}
+          style={[styles.tab, activeTab === 'personal' && [styles.activeTab, { borderBottomColor: theme.primary }]]}
           onPress={() => setActiveTab('personal')}
         >
-          <Text style={activeTab === 'personal' ? styles.activeTabText : styles.tabText}>Личные</Text>
+          <Text style={[
+            styles.tabText, 
+            { color: theme.secondaryText },
+            activeTab === 'personal' && { color: theme.primary, fontWeight: 'bold' }
+          ]}>Личные</Text>
         </TouchableOpacity>
       </View>
 
@@ -84,16 +96,27 @@ const EventsScreen = () => {
         data={filteredEvents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.eventCard}>
+          <View style={[styles.eventCard, { 
+            backgroundColor: theme.card,
+            shadowColor: theme.text
+          }]}>
             <View style={styles.eventHeader}>
-              <Text style={styles.eventTitle}>{item.title}</Text>
+              <Text style={[styles.eventTitle, { color: theme.text }]}>{item.title}</Text>
               <View style={[
                 styles.categoryBadge,
-                { backgroundColor: item.category === 'university' ? '#E6F2FF' : '#FFE6E6' }
+                { 
+                  backgroundColor: item.category === 'university' 
+                    ? (isDarkTheme ? '#1A3A5A' : '#E6F2FF') 
+                    : (isDarkTheme ? '#5A1A1A' : '#FFE6E6') 
+                }
               ]}>
                 <Text style={[
                   styles.categoryText,
-                  { color: item.category === 'university' ? '#0066CC' : '#CC0000' }
+                  { 
+                    color: item.category === 'university' 
+                      ? (isDarkTheme ? '#81B4FF' : '#0066CC') 
+                      : (isDarkTheme ? '#FF8181' : '#CC0000') 
+                  }
                 ]}>
                   {item.category === 'university' ? 'Университет' : 'Личное'}
                 </Text>
@@ -101,25 +124,25 @@ const EventsScreen = () => {
             </View>
             <View style={styles.eventDetails}>
               <View style={styles.detailRow}>
-                <AntDesign name="calendar" size={16} color="#666" />
-                <Text style={styles.detailText}>{item.date}</Text>
+                <AntDesign name="calendar" size={16} color={theme.secondaryText} />
+                <Text style={[styles.detailText, { color: theme.secondaryText }]}>{item.date}</Text>
               </View>
               <View style={styles.detailRow}>
-                <AntDesign name="clockcircleo" size={16} color="#666" />
-                <Text style={styles.detailText}>{item.time}</Text>
+                <AntDesign name="clockcircleo" size={16} color={theme.secondaryText} />
+                <Text style={[styles.detailText, { color: theme.secondaryText }]}>{item.time}</Text>
               </View>
               <View style={styles.detailRow}>
-                <AntDesign name="enviromento" size={16} color="#666" />
-                <Text style={styles.detailText}>{item.location}</Text>
+                <AntDesign name="enviromento" size={16} color={theme.secondaryText} />
+                <Text style={[styles.detailText, { color: theme.secondaryText }]}>{item.location}</Text>
               </View>
             </View>
-            <Text style={styles.eventDescription}>{item.description}</Text>
+            <Text style={[styles.eventDescription, { color: theme.text }]}>{item.description}</Text>
           </View>
         )}
         contentContainerStyle={styles.listContent}
       />
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setShowAddEvent(true)}>
+      <TouchableOpacity style={[styles.addButton, { backgroundColor: theme.primary }]} onPress={() => setShowAddEvent(true)}>
         <AntDesign name="plus" size={24} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
@@ -135,7 +158,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   tab: {
     flex: 1,
@@ -144,14 +166,9 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#2874A6',
   },
   tabText: {
     color: '#666',
-  },
-  activeTabText: {
-    color: '#2874A6',
-    fontWeight: 'bold',
   },
   listContent: {
     padding: 15,

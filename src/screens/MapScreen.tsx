@@ -27,7 +27,7 @@ interface Room {
 }
 
 const MapScreen = () => {
-  const { theme } = useTheme();
+  const { theme, isDarkTheme } = useTheme();
   const [activeView, setActiveView] = useState<'buildings' | 'rooms'>('buildings');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
 
@@ -221,11 +221,14 @@ const MapScreen = () => {
   };
 
   const renderBuildingsList = () => (
-    <ScrollView style={styles.contentContainer}>
+    <ScrollView style={[styles.contentContainer, { backgroundColor: theme.background }]}>
       {buildings.map(building => (
         <TouchableOpacity
           key={building.id}
-          style={styles.buildingCard}
+          style={[styles.buildingCard, { 
+            backgroundColor: theme.card,
+            shadowColor: theme.text 
+          }]}
           onPress={() => handleBuildingSelect(building)}
         >
           <Image
@@ -233,12 +236,12 @@ const MapScreen = () => {
             style={styles.buildingImage}
           />
           <View style={styles.buildingInfo}>
-            <Text style={styles.buildingName}>{building.name}</Text>
+            <Text style={[styles.buildingName, { color: theme.text }]}>{building.name}</Text>
             <View style={styles.addressRow}>
-              <MaterialIcons name="location-on" size={16} color="#666" />
-              <Text style={styles.buildingAddress}>{building.address}</Text>
+              <MaterialIcons name="location-on" size={16} color={theme.secondaryText} />
+              <Text style={[styles.buildingAddress, { color: theme.secondaryText }]}>{building.address}</Text>
             </View>
-            <Text style={styles.buildingDescription} numberOfLines={2}>
+            <Text style={[styles.buildingDescription, { color: theme.text }]} numberOfLines={2}>
               {building.description}
             </Text>
             {renderRatingStars(building.rating)}
@@ -248,78 +251,98 @@ const MapScreen = () => {
     </ScrollView>
   );
 
-  const renderRoomsList = () => (
-    <>
-      <View style={styles.roomsHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
+  const renderRoomsList = () => {
+    const getRoomTypeColor = (type: string) => {
+      switch (type) {
+        case 'classroom': return { bg: isDarkTheme ? '#1A3A5A' : '#E6F2FF', text: isDarkTheme ? '#81B4FF' : '#0066CC' };
+        case 'laboratory': return { bg: isDarkTheme ? '#3A1A5A' : '#F2E6FF', text: isDarkTheme ? '#C281FF' : '#6600CC' };
+        case 'lecture': return { bg: isDarkTheme ? '#1A5A3A' : '#E6FFF2', text: isDarkTheme ? '#81FFC2' : '#00CC66' };
+        case 'admin': return { bg: isDarkTheme ? '#5A3A1A' : '#FFF2E6', text: isDarkTheme ? '#FFC281' : '#CC6600' };
+        default: return { bg: '#f0f0f0', text: '#333333' };
+      }
+    };
+
+    return (
+      <View style={[styles.roomsContainer, { backgroundColor: theme.background }]}>
+        <TouchableOpacity 
+          style={[styles.backToBuildings, { borderBottomColor: theme.border }]} 
           onPress={() => setActiveView('buildings')}
         >
-          <AntDesign name="arrowleft" size={24} color="#2874A6" />
-          <Text style={styles.backButtonText}>Назад к корпусам</Text>
+          <MaterialIcons name="arrow-back" size={24} color={theme.primary} />
+          <Text style={[styles.backText, { color: theme.primary }]}>К списку корпусов</Text>
         </TouchableOpacity>
-        <Text style={styles.selectedBuildingTitle}>
-          {selectedBuilding?.name} - Аудитории
-        </Text>
-      </View>
-      {filteredRooms.length > 0 ? (
+
+        {selectedBuilding && (
+          <View style={[styles.buildingHeader, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.buildingHeaderTitle, { color: theme.text }]}>
+              {selectedBuilding.name}
+            </Text>
+            <Text style={[styles.buildingHeaderAddress, { color: theme.secondaryText }]}>
+              {selectedBuilding.address}
+            </Text>
+          </View>
+        )}
+
         <FlatList
           data={filteredRooms}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.roomCard}>
-              <View style={styles.roomHeader}>
-                <View style={styles.roomNumberContainer}>
-                  <Text style={styles.roomNumber}>{item.number}</Text>
-                  <View style={styles.roomType}>
-                    <Text style={styles.roomTypeText}>
+          renderItem={({ item }) => {
+            const typeColors = getRoomTypeColor(item.type);
+            return (
+              <View style={[styles.roomCard, { 
+                backgroundColor: theme.card,
+                shadowColor: theme.text 
+              }]}>
+                <View style={styles.roomHeader}>
+                  <View>
+                    <Text style={[styles.roomNumber, { color: theme.text }]}>
+                      Аудитория {item.number}
+                    </Text>
+                    <Text style={[styles.floorInfo, { color: theme.secondaryText }]}>
+                      Этаж: {item.floor}
+                    </Text>
+                  </View>
+                  <View style={[styles.roomTypeBadge, { backgroundColor: typeColors.bg }]}>
+                    <Text style={[styles.roomTypeText, { color: typeColors.text }]}>
                       {item.type === 'classroom' ? 'Аудитория' :
                         item.type === 'laboratory' ? 'Лаборатория' :
-                          item.type === 'lecture' ? 'Лекционная' : 'Администрация'}
+                          item.type === 'lecture' ? 'Лекционная' : 'Административная'}
                     </Text>
                   </View>
                 </View>
+
+                <View style={styles.roomDetails}>
+                  <View style={styles.roomDetail}>
+                    <MaterialIcons name="people" size={16} color={theme.secondaryText} />
+                    <Text style={[styles.roomDetailText, { color: theme.secondaryText }]}>
+                      Вместимость: {item.capacity} чел.
+                    </Text>
+                  </View>
+
+                  <View style={styles.equipmentContainer}>
+                    <Text style={[styles.equipmentTitle, { color: theme.text }]}>Оборудование:</Text>
+                    <View style={styles.equipmentList}>
+                      {item.equipment.map((eq, index) => (
+                        <View key={index} style={[styles.equipmentItem, { backgroundColor: theme.primary + '20' }]}>
+                          <Text style={[styles.equipmentText, { color: theme.text }]}>{eq}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+
                 {renderRatingStars(item.rating)}
               </View>
-              <View style={styles.roomDetails}>
-                <View style={styles.roomDetail}>
-                  <MaterialIcons name="layers" size={16} color="#666" />
-                  <Text style={styles.roomDetailText}>Этаж: {item.floor}</Text>
-                </View>
-                <View style={styles.roomDetail}>
-                  <MaterialIcons name="people" size={16} color="#666" />
-                  <Text style={styles.roomDetailText}>Вместимость: {item.capacity}</Text>
-                </View>
-              </View>
-              <View style={styles.equipmentContainer}>
-                <Text style={styles.equipmentTitle}>Оборудование:</Text>
-                <View style={styles.equipmentList}>
-                  {item.equipment.map((equip, index) => (
-                    <View key={index} style={styles.equipmentItem}>
-                      <MaterialIcons name="check-circle" size={14} color="#2874A6" />
-                      <Text style={styles.equipmentText}>{equip}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </View>
-          )}
-          contentContainerStyle={styles.roomsListContent}
+            );
+          }}
         />
-      ) : (
-        <View style={styles.emptyStateContainer}>
-          <Text style={styles.emptyStateText}>
-            Нет данных об аудиториях для этого корпуса
-          </Text>
-        </View>
-      )}
-    </>
-  );
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
-      <HeaderBar title="Карта корпусов" onMenuPress={() => { }} />
-
+      <HeaderBar title="Карта кампуса" onMenuPress={() => { }} />
       {activeView === 'buildings' ? renderBuildingsList() : renderRoomsList()}
     </SafeAreaView>
   );
@@ -378,27 +401,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 5,
   },
-  roomsHeader: {
+  roomsContainer: {
+    flex: 1,
+  },
+  backToBuildings: {
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  backButtonText: {
+  backText: {
     marginLeft: 5,
     color: '#2874A6',
     fontSize: 16,
   },
-  selectedBuildingTitle: {
+  buildingHeader: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  buildingHeaderTitle: {
     fontSize: 18,
     fontWeight: 'bold',
   },
-  roomsListContent: {
-    padding: 15,
+  buildingHeaderAddress: {
+    fontSize: 14,
+    color: '#666',
   },
   roomCard: {
     backgroundColor: '#f9f9f9',
@@ -417,17 +444,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  roomNumberContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   roomNumber: {
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 10,
   },
-  roomType: {
-    backgroundColor: '#E6F2FF',
+  floorInfo: {
+    fontSize: 14,
+    color: '#666',
+  },
+  roomTypeBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 12,
@@ -473,17 +499,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 13,
     color: '#333',
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyStateText: {
-    color: '#666',
-    fontSize: 16,
-    textAlign: 'center',
   },
 });
 

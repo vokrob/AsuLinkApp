@@ -105,7 +105,7 @@ const ProfileScreen = () => {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -141,13 +141,15 @@ const ProfileScreen = () => {
   };
 
   const getFieldIcon = (field: string) => {
+    const iconColor = theme.secondaryText;
+    
     switch (field) {
-      case 'email': return <MaterialIcons name="email" size={24} color="#666" />;
-      case 'phone': return <MaterialIcons name="smartphone" size={24} color="#666" />;
-      case 'faculty': return <MaterialIcons name="school" size={24} color="#666" />;
-      case 'group': return <MaterialIcons name="group" size={24} color="#666" />;
-      case 'birthDate': return <MaterialIcons name="cake" size={24} color="#666" />;
-      default: return <MaterialIcons name="info" size={24} color="#666" />;
+      case 'email': return <MaterialIcons name="email" size={24} color={iconColor} />;
+      case 'phone': return <MaterialIcons name="smartphone" size={24} color={iconColor} />;
+      case 'faculty': return <MaterialIcons name="school" size={24} color={iconColor} />;
+      case 'group': return <MaterialIcons name="group" size={24} color={iconColor} />;
+      case 'birthDate': return <MaterialIcons name="cake" size={24} color={iconColor} />;
+      default: return <MaterialIcons name="info" size={24} color={iconColor} />;
     }
   };
 
@@ -159,18 +161,24 @@ const ProfileScreen = () => {
         showMenuButton={true}
       />
 
-      <RightSideMenu
-        visible={rightMenuVisible}
-        onClose={toggleRightMenu}
-        isDarkTheme={isDarkTheme}
-        onToggleTheme={toggleTheme}
-        onSettingsPress={handleSettingsPress}
-        onSupportPress={handleSupportPress}
-        isProfileScreen={true}
-      />
+      {rightMenuVisible && (
+        <RightSideMenu
+          visible={rightMenuVisible}
+          onClose={toggleRightMenu}
+          isDarkTheme={isDarkTheme}
+          onToggleTheme={toggleTheme}
+          onSettingsPress={handleSettingsPress}
+          onSupportPress={handleSupportPress}
+          isProfileScreen={true}
+        />
+      )}
 
-      <ScrollView style={styles.container}>
-        <View style={styles.profileHeader}>
+      <ScrollView 
+        style={[styles.container, { backgroundColor: theme.background }]}
+        scrollEnabled={!rightMenuVisible}
+        pointerEvents={rightMenuVisible ? 'none' : 'auto'}
+      >
+        <View style={[styles.profileHeader, { borderBottomColor: theme.border }]}>
           <TouchableOpacity
             style={styles.avatarContainer}
             onPress={handleAvatarChange}
@@ -182,9 +190,9 @@ const ProfileScreen = () => {
             />
           </TouchableOpacity>
 
-          <Text style={styles.userName}>{profile.name}</Text>
-          <View style={styles.roleBadge}>
-            <Text style={styles.roleText}>
+          <Text style={[styles.userName, { color: theme.text }]}>{profile.name}</Text>
+          <View style={[styles.roleBadge, { backgroundColor: isDarkTheme ? '#1A3A5A' : '#E6F2FF' }]}>
+            <Text style={[styles.roleText, { color: isDarkTheme ? '#81B4FF' : '#0066CC' }]}>
               {profile.role === 'student'
                 ? 'Студент'
                 : profile.role === 'professor'
@@ -194,8 +202,8 @@ const ProfileScreen = () => {
           </View>
         </View>
 
-        <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>Информация</Text>
+        <View style={[styles.infoSection, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Информация</Text>
 
           {['faculty', 'group', 'email', 'phone', 'birthDate'].map((field) => (
             <TouchableOpacity
@@ -205,14 +213,14 @@ const ProfileScreen = () => {
             >
               {getFieldIcon(field)}
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>
+                <Text style={[styles.infoLabel, { color: theme.secondaryText }]}>
                   {field === 'faculty' ? 'Факультет' :
                     field === 'group' ? 'Группа' :
                       field === 'email' ? 'Email' :
                         field === 'phone' ? 'Телефон' :
                           field === 'birthDate' ? 'Дата рождения' : ''}
                 </Text>
-                <Text style={styles.infoValue}>
+                <Text style={[styles.infoValue, { color: theme.text }]}>
                   {profile[field as keyof UserProfile]}
                 </Text>
               </View>
@@ -222,15 +230,15 @@ const ProfileScreen = () => {
 
         <View style={styles.aboutSection}>
           <View style={styles.aboutHeader}>
-            <Text style={styles.sectionTitle}>О себе</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>О себе</Text>
             <TouchableOpacity
               style={styles.editFieldButton}
               onPress={() => handleEditField('about')}
             >
-              <MaterialIcons name="edit" size={20} color="#2874A6" />
+              <MaterialIcons name="edit" size={20} color={theme.primary} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.aboutText}>{profile.about}</Text>
+          <Text style={[styles.aboutText, { color: theme.text }]}>{profile.about}</Text>
         </View>
       </ScrollView>
 
@@ -241,9 +249,12 @@ const ProfileScreen = () => {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
+          <View style={[styles.modalContent, { 
+            backgroundColor: theme.background,
+            shadowColor: isDarkTheme ? '#000' : '#666'
+          }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
                 {editField === 'faculty' ? 'Факультет' :
                   editField === 'group' ? 'Группа' :
                     editField === 'email' ? 'Email' :
@@ -252,24 +263,32 @@ const ProfileScreen = () => {
                           editField === 'about' ? 'О себе' : 'Редактирование'}
               </Text>
               <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-                <AntDesign name="close" size={24} color="#333" />
+                <AntDesign name="close" size={24} color={theme.text} />
               </TouchableOpacity>
             </View>
 
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { 
+                borderColor: theme.border,
+                backgroundColor: isDarkTheme ? theme.card : '#f9f9f9',
+                color: theme.text
+              }]}
               value={editValue}
               onChangeText={setEditValue}
               multiline={editField === 'about'}
               numberOfLines={editField === 'about' ? 4 : 1}
               autoCapitalize="none"
+              placeholderTextColor={theme.placeholderText}
               keyboardType={
                 editField === 'email' ? 'email-address' :
                   editField === 'phone' ? 'phone-pad' : 'default'
               }
             />
 
-            <TouchableOpacity style={styles.saveButton} onPress={saveFieldEdit}>
+            <TouchableOpacity 
+              style={[styles.saveButton, { backgroundColor: theme.primary }]} 
+              onPress={saveFieldEdit}
+            >
               <Text style={styles.saveButtonText}>Сохранить</Text>
             </TouchableOpacity>
           </View>
@@ -283,6 +302,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
+    position: 'relative',
   },
   container: {
     flex: 1,

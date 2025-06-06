@@ -42,21 +42,12 @@ const FeedScreen = () => {
     useEffect(() => {
         const fetchData = async () => {
             const savedPosts = await loadData<Post[]>(KEYS.POSTS, []);
-            const sortedPosts = sortPostsByDate(savedPosts);
-            setPosts(sortedPosts);
+            setPosts(savedPosts);
             await loadUserAvatar();
         };
 
         fetchData();
     }, []);
-
-    const sortPostsByDate = (postsToSort: Post[]): Post[] => {
-        return [...postsToSort].sort((a, b) => {
-            const dateA = a.createdAt ? (a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt as string)) : new Date(0);
-            const dateB = b.createdAt ? (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt as string)) : new Date(0);
-            return dateB.getTime() - dateA.getTime();
-        });
-    };
 
     const loadUserAvatar = async () => {
         try {
@@ -80,9 +71,8 @@ const FeedScreen = () => {
                     return { ...post, avatar: post.avatar || defaultAvatarImage };
                 });
 
-                const sortedUpdatedPosts = sortPostsByDate(updatedPosts);
-                setPosts(sortedUpdatedPosts);
-                saveData(KEYS.POSTS, sortedUpdatedPosts);
+                setPosts(updatedPosts);
+                saveData(KEYS.POSTS, updatedPosts);
             }
         });
     };
@@ -112,8 +102,7 @@ const FeedScreen = () => {
             newPost.image = imageUri;
         }
 
-        const updatedPosts = [newPost, ...posts];
-        setPosts(updatedPosts);
+        setPosts([newPost, ...posts]);
         setModalVisible(false);
     };
 
@@ -145,9 +134,8 @@ const FeedScreen = () => {
                     style: "destructive",
                     onPress: () => {
                         const updatedPosts = posts.filter(post => post.id !== id);
-                        const sortedUpdatedPosts = sortPostsByDate(updatedPosts);
-                        setPosts(sortedUpdatedPosts);
-                        saveData(KEYS.POSTS, sortedUpdatedPosts);
+                        setPosts(updatedPosts);
+                        saveData(KEYS.POSTS, updatedPosts);
                     }
                 }
             ]
@@ -172,11 +160,8 @@ const FeedScreen = () => {
         try {
             await loadUserAvatar();
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const storedPosts = await loadData<Post[]>(KEYS.POSTS, []);
-            if (storedPosts) {
-                setPosts(sortPostsByDate(storedPosts));
-            }
+            const shuffledPosts = [...posts].sort(() => 0.5 - Math.random());
+            setPosts(shuffledPosts);
         } catch (error) {
             console.error('Error refreshing feed:', error);
         } finally {
@@ -186,7 +171,7 @@ const FeedScreen = () => {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
+            <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
                 <HeaderBar
                     title="Новости"
                     showNotification={true}
@@ -208,15 +193,15 @@ const FeedScreen = () => {
                         />
                     )}
                     keyExtractor={(item) => item.id}
-                    style={[styles.feedList, { backgroundColor: theme.background }]}
+                    style={styles.feedList}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={handleRefresh}
-                            colors={[theme.primary]}
-                            tintColor={theme.primary}
+                            colors={['#2874A6']}
+                            tintColor="#2874A6"
                             title="Обновление..."
-                            titleColor={theme.secondaryText}
+                            titleColor="#666"
                         />
                     }
                 />
@@ -228,11 +213,11 @@ const FeedScreen = () => {
                     onRequestClose={() => setModalVisible(false)}
                 >
                     <View style={styles.modalOverlay}>
-                        <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-                            <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
-                                <Text style={[styles.modalTitle, { color: theme.text }]}>Новая запись</Text>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Новая запись</Text>
                                 <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                    <Text style={[styles.closeButton, { color: theme.text }]}>✕</Text>
+                                    <Text style={styles.closeButton}>✕</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -248,6 +233,7 @@ const FeedScreen = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        backgroundColor: '#fff',
     },
     feedList: {
         flex: 1,

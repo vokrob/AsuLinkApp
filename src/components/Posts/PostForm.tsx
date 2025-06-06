@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { View, TextInput, Image, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface PostFormProps {
   onSubmit: (content: string, imageUri?: string) => void;
 }
 
 const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
+  const { theme } = useTheme();
   const [newsText, setNewsText] = useState('');
   const [pickedImage, setPickedImage] = useState<string | undefined>();
 
@@ -19,7 +21,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: false,
       quality: 0.8,
     });
@@ -40,27 +42,44 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <View style={styles.formContainer}>
+    <View style={[styles.formContainer, { 
+      backgroundColor: theme.card
+    }]}>
       <TextInput
-        style={styles.input}
+        style={[styles.input, {
+          backgroundColor: theme.background,
+          color: theme.text,
+          borderColor: theme.border
+        }]}
         placeholder="Напишите новость..."
+        placeholderTextColor={theme.placeholderText}
         value={newsText}
         onChangeText={setNewsText}
         multiline
       />
       <View style={styles.imageRow}>
-        <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
-          <AntDesign name="picture" size={24} color="#2874A6" />
-          <Text style={{ marginLeft: 5, color: '#2874A6' }}>Фото</Text>
+        <TouchableOpacity 
+          style={[styles.imagePickerButton, {
+            backgroundColor: theme.primary + '20' // 20% opacity
+          }]} 
+          onPress={pickImage}
+        >
+          <AntDesign name="picture" size={24} color={theme.primary} />
+          <Text style={{ marginLeft: 5, color: theme.primary }}>Фото</Text>
         </TouchableOpacity>
         {pickedImage && (
-          <Image source={{ uri: pickedImage }} style={styles.miniImage} />
+          <Image source={{ uri: pickedImage }} style={[styles.miniImage, {
+            backgroundColor: theme.border
+          }]} />
         )}
       </View>
       <TouchableOpacity
         style={[
           styles.publishButton,
-          (!newsText.trim() && !pickedImage) ? styles.publishButtonDisabled : null
+          { backgroundColor: theme.primary },
+          (!newsText.trim() && !pickedImage) ? [styles.publishButtonDisabled, {
+            backgroundColor: theme.primary + '70' // 70% opacity
+          }] : null
         ]}
         onPress={handleAddPost}
         disabled={!newsText.trim() && !pickedImage}
@@ -73,19 +92,16 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
 
 const styles = StyleSheet.create({
   formContainer: {
-    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 10,
     marginBottom: 15,
   },
   input: {
-    backgroundColor: '#fff',
     padding: 8,
     borderRadius: 5,
     marginBottom: 7,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
   },
   imageRow: {
     flexDirection: 'row',
@@ -95,7 +111,6 @@ const styles = StyleSheet.create({
   imagePickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EAF2F8',
     padding: 6,
     borderRadius: 6,
   },
@@ -105,16 +120,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginLeft: 10,
     resizeMode: 'contain',
-    backgroundColor: '#e1e1e1'
   },
   publishButton: {
-    backgroundColor: '#2874A6',
     paddingVertical: 10,
     borderRadius: 7,
     alignItems: 'center',
   },
   publishButtonDisabled: {
-    backgroundColor: '#AAC9DB',
   },
   publishButtonText: {
     color: '#fff',

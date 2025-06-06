@@ -4,6 +4,7 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { Swipeable, RectButton } from 'react-native-gesture-handler';
 import { Post } from '../../types/Post';
 import { formatVkStyle } from '../../utils/dateFormat';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface PostItemProps {
   post: Post;
@@ -13,6 +14,7 @@ interface PostItemProps {
 }
 
 const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, onDeletePress }) => {
+  const { theme } = useTheme();
   const formattedDate = post.createdAt ? formatVkStyle(post.createdAt) : '';
   const [fullScreenImage, setFullScreenImage] = useState(false);
 
@@ -49,7 +51,7 @@ const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, 
       friction={2}
       rightThreshold={40}
     >
-      <View style={styles.postContainer}>
+      <View style={[styles.postContainer, { backgroundColor: theme.card }]}>
         <View style={styles.headerContainer}>
           {post.avatar ? (
             <Image
@@ -60,13 +62,13 @@ const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, 
             <View style={styles.avatarPlaceholder} />
           )}
           <View style={styles.authorInfo}>
-            <Text style={styles.author}>{post.author}</Text>
-            {formattedDate ? <Text style={styles.date}>{formattedDate}</Text> : null}
+            <Text style={[styles.author, { color: theme.text }]}>{post.author}</Text>
+            {formattedDate ? <Text style={[styles.date, { color: theme.secondaryText }]}>{formattedDate}</Text> : null}
           </View>
         </View>
 
         {post.content ? (
-          <Text style={styles.content}>{post.content}</Text>
+          <Text style={[styles.content, { color: theme.text }]}>{post.content}</Text>
         ) : null}
 
         {post.image ? (
@@ -114,20 +116,20 @@ const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, 
               style={styles.interactionButton}
               onPress={() => onLikePress && onLikePress(post.id)}
             >
-              <AntDesign name="like2" size={24} color="#777" />
-              <Text style={styles.interactionText}>{post.likes}</Text>
+              <AntDesign name="like2" size={24} color={theme.secondaryText} />
+              <Text style={[styles.interactionText, { color: theme.secondaryText }]}>{post.likes}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.interactionButton}
               onPress={() => onCommentPress && onCommentPress(post.id)}
             >
-              <AntDesign name="message1" size={24} color="#777" />
-              <Text style={styles.interactionText}>{post.comments}</Text>
+              <AntDesign name="message1" size={24} color={theme.secondaryText} />
+              <Text style={[styles.interactionText, { color: theme.secondaryText }]}>{post.comments}</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.viewsContainer}>
-            <AntDesign name="eye" size={18} color="#777" />
-            <Text style={styles.viewsText}>{post.views || 0}</Text>
+            <AntDesign name="eye" size={18} color={theme.secondaryText} />
+            <Text style={[styles.viewsText, { color: theme.secondaryText }]}>{post.views || 0}</Text>
           </View>
         </View>
       </View>

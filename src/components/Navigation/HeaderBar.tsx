@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface HeaderBarProps {
   title: string;
@@ -29,8 +30,10 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   showBackButton = false,
   onBackPress
 }) => {
+  const { theme } = useTheme();
+  
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: theme.primary }]}>
       <View style={styles.headerContent}>
         <View style={styles.headerLeft}>
           {showBackButton && onBackPress && (
@@ -91,7 +94,6 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#2874A6',
     paddingVertical: 15,
     width: '100%',
   },

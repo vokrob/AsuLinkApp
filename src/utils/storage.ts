@@ -1,7 +1,8 @@
 export const KEYS = {
     USER_PROFILE: '@asulink_user_profile',
     POSTS: '@asulink_posts',
-    THEME: '@asulink_theme'
+    THEME: '@asulink_theme',
+    THEME_PREFERENCE: '@asulink_theme_preference'
 };
 
 export const saveData = async (key: string, data: any): Promise<boolean> => {

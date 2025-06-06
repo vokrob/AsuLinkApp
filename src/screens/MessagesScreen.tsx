@@ -258,7 +258,7 @@ const MessagesScreen = () => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <TouchableOpacity
-          style={styles.chatItem}
+          style={[styles.chatItem, { borderBottomColor: theme.border, backgroundColor: theme.card }]}
           onPress={() => handleChatSelect(item)}
         >
           <Image
@@ -268,15 +268,16 @@ const MessagesScreen = () => {
           />
           <View style={styles.chatInfo}>
             <View style={styles.chatHeader}>
-              <Text style={styles.chatName}>{item.name}</Text>
-              <Text style={styles.timestamp}>{item.timestamp}</Text>
+              <Text style={[styles.chatName, { color: theme.text }]}>{item.name}</Text>
+              <Text style={[styles.timestamp, { color: theme.secondaryText }]}>{item.timestamp}</Text>
             </View>
             <View style={styles.messagePreview}>
               <Text
                 numberOfLines={1}
                 style={[
                   styles.lastMessage,
-                  item.unread > 0 && styles.unreadMessage
+                  { color: theme.secondaryText },
+                  item.unread > 0 && [styles.unreadMessage, { color: theme.text }]
                 ]}
               >
                 {item.lastMessage}
@@ -298,8 +299,8 @@ const MessagesScreen = () => {
     const bottomPosition = keyboardHeight > 0 ? keyboardHeight : 0;
 
     return (
-      <View style={{ flex: 1 }}>
-        <View style={styles.conversationHeader}>
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={[styles.conversationHeader, { backgroundColor: theme.primary, borderBottomColor: theme.border }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={handleBackToChats}
@@ -321,7 +322,7 @@ const MessagesScreen = () => {
 
         <ScrollView
           ref={scrollViewRef}
-          style={{ flex: 1 }}
+          style={{ flex: 1, backgroundColor: theme.background }}
           contentContainerStyle={{ paddingBottom: Math.max(70, bottomPosition) }}
         >
           {filteredMessages.map(item => (
@@ -329,13 +330,15 @@ const MessagesScreen = () => {
               key={item.id}
               style={[
                 styles.messageBubble,
-                item.sent ? styles.sentMessage : styles.receivedMessage
+                item.sent ? 
+                  [styles.sentMessage, { backgroundColor: theme.primary }] : 
+                  [styles.receivedMessage, { backgroundColor: theme.card }]
               ]}
             >
               <Text
                 style={[
                   styles.messageText,
-                  !item.sent && styles.receivedMessageText
+                  item.sent ? { color: '#ffffff' } : { color: theme.text }
                 ]}
               >
                 {item.text}
@@ -344,7 +347,7 @@ const MessagesScreen = () => {
                 <Text
                   style={[
                     styles.messageTime,
-                    item.sent && { color: '#e0e0e0' }
+                    item.sent ? { color: '#e0e0e0' } : { color: theme.secondaryText }
                   ]}
                 >
                   {item.timestamp}
@@ -364,11 +367,20 @@ const MessagesScreen = () => {
 
         <View style={[
           styles.extremeFixedInput,
-          { bottom: bottomPosition }
+          { 
+            bottom: bottomPosition, 
+            backgroundColor: theme.card,
+            borderTopColor: theme.border
+          }
         ]}>
           <TextInput
-            style={styles.messageInput}
+            style={[styles.messageInput, { 
+              backgroundColor: theme.background,
+              color: theme.text,
+              borderColor: theme.border
+            }]}
             placeholder="Сообщение..."
+            placeholderTextColor={theme.placeholderText}
             value={messageText}
             onChangeText={setMessageText}
             multiline
@@ -392,7 +404,7 @@ const MessagesScreen = () => {
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
         {activeView === 'chats' ? (
           <>
@@ -413,7 +425,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   chatItem: {
     flexDirection: 'row',
