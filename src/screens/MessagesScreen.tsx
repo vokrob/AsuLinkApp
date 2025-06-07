@@ -77,9 +77,11 @@ const MessagesScreen = () => {
     navigation.setOptions({
       tabBarStyle: {
         display: activeView === 'conversation' ? 'none' : 'flex',
+        backgroundColor: theme.background,
+        borderTopColor: theme.border,
       }
     });
-  }, [navigation, activeView]);
+  }, [navigation, activeView, theme]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -177,7 +179,11 @@ const MessagesScreen = () => {
   const handleBackToChats = () => {
     setActiveView('chats');
     navigation.setOptions({
-      tabBarStyle: { display: 'flex' }
+      tabBarStyle: { 
+        display: 'flex',
+        backgroundColor: theme.background,
+        borderTopColor: theme.border,
+      }
     });
   };
 
