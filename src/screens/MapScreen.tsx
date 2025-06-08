@@ -225,9 +225,9 @@ const MapScreen = () => {
       {buildings.map(building => (
         <TouchableOpacity
           key={building.id}
-          style={[styles.buildingCard, { 
+          style={[styles.buildingCard, {
             backgroundColor: theme.card,
-            shadowColor: theme.text 
+            shadowColor: theme.text
           }]}
           onPress={() => handleBuildingSelect(building)}
         >
@@ -264,8 +264,8 @@ const MapScreen = () => {
 
     return (
       <View style={[styles.roomsContainer, { backgroundColor: theme.background }]}>
-        <TouchableOpacity 
-          style={[styles.backToBuildings, { borderBottomColor: theme.border }]} 
+        <TouchableOpacity
+          style={[styles.backToBuildings, { borderBottomColor: theme.border }]}
           onPress={() => setActiveView('buildings')}
         >
           <MaterialIcons name="arrow-back" size={24} color={theme.primary} />
@@ -289,9 +289,9 @@ const MapScreen = () => {
           renderItem={({ item }) => {
             const typeColors = getRoomTypeColor(item.type);
             return (
-              <View style={[styles.roomCard, { 
+              <View style={[styles.roomCard, {
                 backgroundColor: theme.card,
-                shadowColor: theme.text 
+                shadowColor: theme.text
               }]}>
                 <View style={styles.roomHeader}>
                   <View>

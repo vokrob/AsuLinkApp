@@ -179,7 +179,7 @@ const MessagesScreen = () => {
   const handleBackToChats = () => {
     setActiveView('chats');
     navigation.setOptions({
-      tabBarStyle: { 
+      tabBarStyle: {
         display: 'flex',
         backgroundColor: theme.background,
         borderTopColor: theme.border,
@@ -336,8 +336,8 @@ const MessagesScreen = () => {
               key={item.id}
               style={[
                 styles.messageBubble,
-                item.sent ? 
-                  [styles.sentMessage, { backgroundColor: theme.primary }] : 
+                item.sent ?
+                  [styles.sentMessage, { backgroundColor: theme.primary }] :
                   [styles.receivedMessage, { backgroundColor: theme.card }]
               ]}
             >
@@ -373,14 +373,14 @@ const MessagesScreen = () => {
 
         <View style={[
           styles.extremeFixedInput,
-          { 
-            bottom: bottomPosition, 
+          {
+            bottom: bottomPosition,
             backgroundColor: theme.card,
             borderTopColor: theme.border
           }
         ]}>
           <TextInput
-            style={[styles.messageInput, { 
+            style={[styles.messageInput, {
               backgroundColor: theme.background,
               color: theme.text,
               borderColor: theme.border

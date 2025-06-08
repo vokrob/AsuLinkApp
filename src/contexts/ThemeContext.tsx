@@ -46,8 +46,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const systemColorScheme = useColorScheme();
-  
-  // Load saved theme preference
+
   useEffect(() => {
     const loadThemePreference = async () => {
       try {
@@ -55,7 +54,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (savedTheme !== null) {
           setIsDarkTheme(savedTheme);
         } else {
-          // Use system preference as default if available
           if (systemColorScheme) {
             setIsDarkTheme(systemColorScheme === 'dark');
           }
@@ -64,14 +62,13 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         console.error('Error loading theme preference:', error);
       }
     };
-    
+
     loadThemePreference();
   }, [systemColorScheme]);
-  
+
   const toggleTheme = () => {
     setIsDarkTheme(prev => {
       const newValue = !prev;
-      // Save theme preference
       saveData(KEYS.THEME_PREFERENCE, newValue).catch(error => {
         console.error('Error saving theme preference:', error);
       });

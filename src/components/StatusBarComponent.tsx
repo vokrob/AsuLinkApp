@@ -6,7 +6,6 @@ interface StatusBarComponentProps {
   barStyle?: 'default' | 'light-content' | 'dark-content';
 }
 
-// Функция для получения высоты статус-бара
 const getStatusBarHeight = (): number => {
   return Platform.OS === 'ios' ? 20 : StatusBar.currentHeight || 24;
 };
@@ -16,10 +15,10 @@ const StatusBarComponent: React.FC<StatusBarComponentProps> = ({
   barStyle = 'light-content'
 }) => {
   const statusBarHeight = getStatusBarHeight();
-  
+
   return (
     <View style={[styles.statusBar, { height: statusBarHeight, backgroundColor }]}>
-      <StatusBar 
+      <StatusBar
         backgroundColor={backgroundColor}
         barStyle={barStyle}
         translucent={false}

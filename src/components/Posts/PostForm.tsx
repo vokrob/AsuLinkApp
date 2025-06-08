@@ -42,7 +42,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <View style={[styles.formContainer, { 
+    <View style={[styles.formContainer, {
       backgroundColor: theme.card
     }]}>
       <TextInput
@@ -58,10 +58,10 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
         multiline
       />
       <View style={styles.imageRow}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.imagePickerButton, {
-            backgroundColor: theme.primary + '20' // 20% opacity
-          }]} 
+            backgroundColor: theme.primary + '20'
+          }]}
           onPress={pickImage}
         >
           <AntDesign name="picture" size={24} color={theme.primary} />
@@ -78,7 +78,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
           styles.publishButton,
           { backgroundColor: theme.primary },
           (!newsText.trim() && !pickedImage) ? [styles.publishButtonDisabled, {
-            backgroundColor: theme.primary + '70' // 70% opacity
+            backgroundColor: theme.primary + '70'
           }] : null
         ]}
         onPress={handleAddPost}

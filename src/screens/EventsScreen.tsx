@@ -65,7 +65,7 @@ const EventsScreen = () => {
           onPress={() => setActiveTab('all')}
         >
           <Text style={[
-            styles.tabText, 
+            styles.tabText,
             { color: theme.secondaryText },
             activeTab === 'all' && { color: theme.primary, fontWeight: 'bold' }
           ]}>Все</Text>
@@ -75,7 +75,7 @@ const EventsScreen = () => {
           onPress={() => setActiveTab('university')}
         >
           <Text style={[
-            styles.tabText, 
+            styles.tabText,
             { color: theme.secondaryText },
             activeTab === 'university' && { color: theme.primary, fontWeight: 'bold' }
           ]}>Университет</Text>
@@ -85,7 +85,7 @@ const EventsScreen = () => {
           onPress={() => setActiveTab('personal')}
         >
           <Text style={[
-            styles.tabText, 
+            styles.tabText,
             { color: theme.secondaryText },
             activeTab === 'personal' && { color: theme.primary, fontWeight: 'bold' }
           ]}>Личные</Text>
@@ -96,7 +96,7 @@ const EventsScreen = () => {
         data={filteredEvents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={[styles.eventCard, { 
+          <View style={[styles.eventCard, {
             backgroundColor: theme.card,
             shadowColor: theme.text
           }]}>
@@ -104,18 +104,18 @@ const EventsScreen = () => {
               <Text style={[styles.eventTitle, { color: theme.text }]}>{item.title}</Text>
               <View style={[
                 styles.categoryBadge,
-                { 
-                  backgroundColor: item.category === 'university' 
-                    ? (isDarkTheme ? '#1A3A5A' : '#E6F2FF') 
-                    : (isDarkTheme ? '#5A1A1A' : '#FFE6E6') 
+                {
+                  backgroundColor: item.category === 'university'
+                    ? (isDarkTheme ? '#1A3A5A' : '#E6F2FF')
+                    : (isDarkTheme ? '#5A1A1A' : '#FFE6E6')
                 }
               ]}>
                 <Text style={[
                   styles.categoryText,
-                  { 
-                    color: item.category === 'university' 
-                      ? (isDarkTheme ? '#81B4FF' : '#0066CC') 
-                      : (isDarkTheme ? '#FF8181' : '#CC0000') 
+                  {
+                    color: item.category === 'university'
+                      ? (isDarkTheme ? '#81B4FF' : '#0066CC')
+                      : (isDarkTheme ? '#FF8181' : '#CC0000')
                   }
                 ]}>
                   {item.category === 'university' ? 'Университет' : 'Личное'}

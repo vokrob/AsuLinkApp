@@ -172,7 +172,7 @@ const FeedScreen = () => {
         try {
             await loadUserAvatar();
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             const storedPosts = await loadData<Post[]>(KEYS.POSTS, []);
             if (storedPosts) {
                 setPosts(sortPostsByDate(storedPosts));

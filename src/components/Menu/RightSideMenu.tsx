@@ -26,9 +26,8 @@ const RightSideMenu: React.FC<RightSideMenuProps> = ({
   const screenWidth = Dimensions.get('window').width;
   const slideAnim = useRef(new Animated.Value(screenWidth)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const menuWidth = screenWidth * 0.7; // 70% of screen width
+  const menuWidth = screenWidth * 0.7;
 
-  // Handle Android back button
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       if (visible) {
@@ -41,14 +40,11 @@ const RightSideMenu: React.FC<RightSideMenuProps> = ({
     return () => backHandler.remove();
   }, [visible, onClose]);
 
-  // Animation logic
   useEffect(() => {
     if (visible) {
-      // Reset animation value if needed
       slideAnim.setValue(menuWidth);
       backdropOpacity.setValue(0);
-      
-      // Start animation
+
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
@@ -87,17 +83,17 @@ const RightSideMenu: React.FC<RightSideMenuProps> = ({
           { opacity: backdropOpacity }
         ]}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backdropTouchable}
           activeOpacity={1}
           onPress={onClose}
         />
       </Animated.View>
-      
+
       <Animated.View
         style={[
           styles.rightMenu,
-          { 
+          {
             transform: [{ translateX: slideAnim }],
             width: menuWidth,
             backgroundColor: theme.background,
@@ -111,8 +107,8 @@ const RightSideMenu: React.FC<RightSideMenuProps> = ({
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.menuItem, { borderBottomColor: theme.border }]} 
+        <TouchableOpacity
+          style={[styles.menuItem, { borderBottomColor: theme.border }]}
           onPress={onSupportPress}
         >
           <MaterialIcons name="support-agent" size={24} color={theme.text} />

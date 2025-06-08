@@ -142,7 +142,7 @@ const ProfileScreen = () => {
 
   const getFieldIcon = (field: string) => {
     const iconColor = theme.secondaryText;
-    
+
     switch (field) {
       case 'email': return <MaterialIcons name="email" size={24} color={iconColor} />;
       case 'phone': return <MaterialIcons name="smartphone" size={24} color={iconColor} />;
@@ -173,7 +173,7 @@ const ProfileScreen = () => {
         />
       )}
 
-      <ScrollView 
+      <ScrollView
         style={[styles.container, { backgroundColor: theme.background }]}
         scrollEnabled={!rightMenuVisible}
         pointerEvents={rightMenuVisible ? 'none' : 'auto'}
@@ -249,7 +249,7 @@ const ProfileScreen = () => {
         onRequestClose={() => setEditModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, { 
+          <View style={[styles.modalContent, {
             backgroundColor: theme.background,
             shadowColor: isDarkTheme ? '#000' : '#666'
           }]}>
@@ -268,7 +268,7 @@ const ProfileScreen = () => {
             </View>
 
             <TextInput
-              style={[styles.modalInput, { 
+              style={[styles.modalInput, {
                 borderColor: theme.border,
                 backgroundColor: isDarkTheme ? theme.card : '#f9f9f9',
                 color: theme.text
@@ -285,8 +285,8 @@ const ProfileScreen = () => {
               }
             />
 
-            <TouchableOpacity 
-              style={[styles.saveButton, { backgroundColor: theme.primary }]} 
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: theme.primary }]}
               onPress={saveFieldEdit}
             >
               <Text style={styles.saveButtonText}>Сохранить</Text>

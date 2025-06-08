@@ -31,7 +31,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   onBackPress
 }) => {
   const { theme } = useTheme();
-  
+
   return (
     <View style={[styles.header, { backgroundColor: theme.primary }]}>
       <View style={styles.headerContent}>
