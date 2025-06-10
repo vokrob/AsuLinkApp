@@ -1,185 +1,214 @@
 # AsuLinkApp
 
-Мобильное приложение социальной сети для студентов и преподавателей университета с Django REST API backend.
+A social networking mobile application built with React Native frontend and Django REST API backend.
 
-## Структура проекта
+## Description
+
+AsuLinkApp is a mobile application developed for students of Astrakhan State University. The application provides social networking features, including:
+
+- 📱 **News Feed** - view and create posts
+- 💬 **Messages** - communication between users  
+- 📅 **Events** - information about university events
+- 🗺️ **Map** - campus navigation
+- 👤 **Profile** - personal information management
+
+## Technologies
+
+### Frontend (React Native)
+- **React Native 0.79.2** with TypeScript
+- **Expo SDK 53** for development and building
+- **React Navigation** for screen navigation
+- **Gesture Handler** for gestures and animations
+- **Vector Icons** for interface icons
+
+### Backend (Django)
+- **Django 5.1.4** with SQLite database
+- **Django REST Framework** for API
+- **Django Allauth** for authentication
+- **CORS Headers** for mobile request support
+
+## Project Structure
 
 ```
 AsuLinkApp/
 ├── backend/                 # Django REST API Backend
-│   ├── asulinkapp_backend/  # Настройки Django проекта
-│   ├── accounts/            # Аутентификация и профили пользователей
-│   ├── posts/               # Модели постов, комментариев, лайков
+│   ├── asulinkapp_backend/  # Django project settings
+│   ├── accounts/            # User authentication and profiles
+│   ├── posts/               # Posts, comments, likes models
 │   ├── api/                 # REST API endpoints
-│   ├── requirements.txt     # Python зависимости
+│   ├── requirements.txt     # Python dependencies
 │   ├── manage.py           # Django management script
-│   └── README.md           # Документация backend
+│   └── db.sqlite3          # SQLite database
 ├── src/                    # React Native Frontend
-│   ├── components/         # Переиспользуемые компоненты
-│   │   ├── Navigation/     # Компоненты навигации
-│   │   ├── Menu/           # Компоненты меню
-│   │   └── Posts/          # Компоненты для постов
-│   ├── contexts/           # React контексты
-│   │   └── ThemeContext.tsx # Контекст для управления темой
-│   ├── navigation/         # Конфигурация навигации
-│   ├── screens/            # Экраны приложения
-│   ├── services/           # Сервисы для работы с API
-│   ├── types/              # TypeScript типы
-│   └── utils/              # Вспомогательные функции
-├── assets/                 # Статические ресурсы (изображения, иконки)
-└── package.json           # Node.js зависимости
+│   ├── components/         # Reusable components
+│   │   ├── Navigation/     # Navigation components
+│   │   ├── Menu/           # Menu components
+│   │   └── Posts/          # Post-related components
+│   ├── screens/            # Application screens
+│   ├── services/           # API service layer
+│   ├── contexts/           # React contexts
+│   ├── utils/              # Utility functions
+│   ├── types/              # TypeScript type definitions
+│   └── navigation/         # Navigation configuration
+├── android/                # Android-specific files
+├── assets/                 # Static assets
+├── App.tsx                 # Main React Native component
+├── package.json            # Node.js dependencies
+└── README.md              # This file
 ```
 
-## Реализованный функционал
+## Installation and Setup
+
+### Requirements
+
+- **Node.js** 18+ and npm
+- **Python** 3.8+
+- **Android Studio** (for Android development)
+- **Xcode** (for iOS development, macOS only)
 
 ### Backend (Django)
-- ✅ **Django 5.1.4** с SQLite базой данных
-- ✅ **Django REST Framework** для API endpoints
-- ✅ **Django Allauth** для аутентификации (регистрация, вход, верификация email)
-- ✅ **Token-based аутентификация** для API доступа
-- ✅ **CORS поддержка** для интеграции с frontend
-- ✅ **Профили пользователей** с поддержкой аватаров
-- ✅ **Система постов** с лайками, комментариями и просмотрами
-- ✅ **Админ-панель** для управления контентом
 
-### Frontend (React Native)
-- ✅ **React Native** с TypeScript
-- ✅ **Expo** для разработки и сборки
-- ✅ **React Navigation** для навигации между экранами
-- ✅ **Поддержка тем** с контекстом
-- ✅ **API интеграция** с Django backend
-- ✅ **Аутентификация пользователей**
-- ✅ **Лента постов** с социальными функциями
-
-### Планируемый функционал
-1. **Сообщения**
-   - Чат между пользователями
-   - Уведомления о новых сообщениях
-
-2. **Календарь событий**
-   - Общий календарь событий университета
-   - Персональный календарь с возможностью добавления мероприятий
-
-3. **Интерактивная карта корпусов**
-   - Расположение корпусов на карте Барнаула
-   - Внутренние карты корпусов
-   - Отзывы о аудиториях
-
-## Быстрый старт
-
-### Настройка Backend
-
-1. **Перейти в директорию backend:**
+1. **Navigate to backend directory:**
    ```bash
    cd backend
    ```
 
-2. **Активировать виртуальное окружение:**
+2. **Create virtual environment:**
    ```bash
-   # Windows
-   .\venv\Scripts\activate
-
-   # macOS/Linux
-   source venv/bin/activate
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. **Установить зависимости:**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Выполнить миграции:**
+4. **Run migrations:**
    ```bash
    python manage.py migrate
    ```
 
-5. **Создать тестовые данные:**
+5. **Create superuser (optional):**
    ```bash
-   python create_sample_data.py
+   python manage.py createsuperuser
    ```
 
-6. **Запустить сервер backend:**
+6. **Start development server:**
    ```bash
-   python manage.py runserver
+   python manage.py runserver 0.0.0.0:8000
    ```
 
-   Backend будет доступен по адресу: `http://127.0.0.1:8000/`
+### Frontend (React Native)
 
-### Настройка Frontend
-
-1. **Установить зависимости:**
+1. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Запустить Expo development server:**
+2. **Start Expo development server:**
    ```bash
    npm start
    ```
 
-3. **Запуск на устройстве/симуляторе:**
+3. **Run on device/emulator:**
    ```bash
-   npm run android  # Для Android
-   npm run ios      # Для iOS
-   npm run web      # Для веб-браузера
+   npm run android  # For Android
+   npm run ios      # For iOS
    ```
 
-## API Документация
+## Features
 
-### Endpoints аутентификации
-- `POST /api/auth/login/` - Вход пользователя
-- `POST /api/auth/register/` - Регистрация пользователя
-- `POST /api/auth/logout/` - Выход пользователя
+### ✅ Implemented
 
-### Endpoints постов
-- `GET /api/posts/` - Список всех постов
-- `POST /api/posts/` - Создание нового поста (требует аутентификации)
-- `GET /api/posts/{id}/` - Получение конкретного поста
-- `POST /api/posts/{id}/like/` - Переключение лайка на посте
+#### Authentication
+- 📧 **Registration with email verification**
+- 🔐 **Login with username or email**
+- 🔑 **Token-based authentication**
+- 📱 **Django Allauth integration**
 
-### Endpoints пользователей
-- `GET /api/profile/` - Получение профиля текущего пользователя
-- `PUT /api/profile/` - Обновление профиля пользователя
+#### News Feed
+- 📝 **Create posts with text and images**
+- ❤️ **Like system**
+- 💬 **Comments on posts**
+- 👁️ **View counters**
+- 🔄 **Pull-to-refresh updates**
 
-## Разработка
+#### Interface
+- 🎨 **Dark and light themes**
+- 📱 **Responsive design**
+- 🧭 **Bottom Tab navigation**
+- 🔔 **Notification system**
 
-### Тестирование Backend API
-```bash
-cd backend
-python test_api.py
-```
+### 🚧 In Development
 
-### Запуск Django тестов
-```bash
-cd backend
-python manage.py test
-```
+- 💬 **Messaging system**
+- 📅 **Events calendar**
+- 🗺️ **Interactive campus map**
+- 👥 **Friends system**
+- 🔍 **User and content search**
 
-### Админ-панель
-Доступ к Django админ-панели: `http://127.0.0.1:8000/admin/`
-- Логин: `admin`
-- Пароль: `admin123`
+## API Endpoints
 
-## Стек технологий
+### Authentication
+- `POST /api/auth/send-code/` - Send verification code
+- `POST /api/auth/verify-code/` - Verify email code
+- `POST /api/auth/complete-profile/` - Complete registration
+- `POST /api/auth/login/` - User login
+- `POST /api/auth/logout/` - User logout
+- `GET /api/auth/me/` - Current user info
+
+### Posts
+- `GET /api/posts/` - List posts
+- `POST /api/posts/` - Create post
+- `GET /api/posts/{id}/` - Specific post
+- `POST /api/posts/{id}/like/` - Like/unlike
+- `POST /api/posts/{id}/view/` - Increment views
+
+### Users
+- `GET /api/profile/` - User profile
+- `GET /api/users/{id}/` - User information
+
+## Configuration
 
 ### Backend
-- **Django 5.1.4** - Веб-фреймворк
-- **Django REST Framework** - API фреймворк
-- **Django Allauth** - Аутентификация
-- **SQLite** - База данных
-- **Python 3.8+** - Язык программирования
+- **Database**: SQLite (for development)
+- **Email backend**: Console (for development)
+- **CORS**: Configured for React Native
+- **Static files**: Served in development mode
 
 ### Frontend
-- **React Native** - Мобильный фреймворк
-- **TypeScript** - Типизация
-- **Expo** - Платформа разработки
-- **React Navigation** - Навигация
-- **AsyncStorage** - Локальное хранилище
+- **API URL**: `http://192.168.1.73:8000/api` (update for your network)
+- **Authentication**: Token-based
+- **Navigation**: Stack + Bottom Tab
 
-## Функции безопасности
+## Development
 
-- ✅ Token-based аутентификация
-- ✅ CSRF защита
-- ✅ CORS конфигурация
-- ✅ Проверка прав пользователей
-- ✅ Поддержка верификации email
+### Testing
+```bash
+# Backend tests
+cd backend
+python manage.py test
+
+# Frontend tests
+npm test
+```
+
+### Production Build
+```bash
+# Android APK
+npm run android
+
+# iOS build
+npm run ios
+```
+
+## Contributors
+
+- **Developer**: Danil Borkov
+- **University**: Astrakhan State University
+- **Faculty**: Mathematics and Information Technologies
+
+## License
+
+This project is created for educational purposes for Astrakhan State University.

@@ -1,0 +1,1 @@
+[AsuLinkApp] Код подтверждения: {{ verification_code }}

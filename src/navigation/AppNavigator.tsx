@@ -11,12 +11,23 @@ import MessagesScreen from '../screens/MessagesScreen';
 import EventsScreen from '../screens/EventsScreen';
 import MapScreen from '../screens/MapScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import CodeVerificationScreen from '../screens/CodeVerificationScreen';
+import EmailConfirmationScreen from '../screens/EmailConfirmationScreen';
 import { useTheme } from '../contexts/ThemeContext';
 
 export type RootStackParamList = {
   Login: undefined;
   Main: undefined;
   Settings: undefined;
+  CodeVerification: {
+    email: string;
+    username: string;
+    next_step?: string;
+  };
+  EmailConfirmation: {
+    email: string;
+    username?: string;
+  };
 };
 
 export type MainTabParamList = {
@@ -106,6 +117,8 @@ const AppNavigator = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="CodeVerification" component={CodeVerificationScreen} />
+        <Stack.Screen name="EmailConfirmation" component={EmailConfirmationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

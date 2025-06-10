@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подтверждение Email - AsuLinkApp</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #2465a9;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .message {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .btn {
+            background: #2465a9;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #1a4d7a;
+        }
+        .email-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2465a9;
+        }
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">A</div>
+        <h1>Подтверждение Email</h1>
+        
+        {% if confirmation %}
+            <div class="message">
+                Пожалуйста, подтвердите ваш email адрес, нажав на кнопку ниже:
+            </div>
+            
+            <div class="email-info">
+                <strong>Email:</strong> {{ confirmation.email_address.email }}
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">
+                    ✅ Подтвердить Email
+                </button>
+            </form>
+        {% else %}
+            <div class="message">
+                Ссылка для подтверждения недействительна или уже была использована.
+            </div>
+            
+            <a href="/api/auth/resend-confirmation/" class="btn">
+                📧 Отправить новое письмо
+            </a>
+        {% endif %}
+        
+        <div class="footer">
+            <p>AsuLinkApp - Алтайский Государственный Университет</p>
+            <p>Если у вас возникли проблемы, обратитесь в службу поддержки</p>
+        </div>
+    </div>
+</body>
+</html>

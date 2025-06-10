@@ -20,6 +20,7 @@
     "expo-checkbox": "~4.1.4",
     "expo-image-picker": "~16.1.4",
     "expo-status-bar": "~2.2.3",
+    "node-fetch": "^2.7.0",
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Подтвержден - AsuLinkApp</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .message {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .success-message {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+            color: #2e7d32;
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #666;
+        }
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+        .app-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Email Успешно Подтвержден!</h1>
+        
+        <div class="success-message">
+            <strong>Поздравляем!</strong><br>
+            Ваш email адрес был успешно подтвержден. Теперь вы можете войти в приложение AsuLinkApp.
+        </div>
+        
+        <div class="app-info">
+            <strong>📱 Для входа в мобильное приложение:</strong><br>
+            Используйте ваши учетные данные (username/email и пароль) для входа в приложение.
+        </div>
+        
+        <div class="instructions">
+            <h3>🚀 Следующие шаги:</h3>
+            <ol>
+                <li>Откройте мобильное приложение AsuLinkApp</li>
+                <li>Нажмите "Войти" на экране входа</li>
+                <li>Введите ваш username или email и пароль</li>
+                <li>Наслаждайтесь использованием приложения!</li>
+            </ol>
+        </div>
+        
+        <div class="footer">
+            <p><strong>AsuLinkApp</strong></p>
+            <p>Алтайский Государственный Университет</p>
+            <p>Добро пожаловать в наше сообщество! 🎓</p>
+        </div>
+    </div>
+
+    <script>
+        // Автоматически закрыть страницу через 10 секунд (если открыта в браузере мобильного устройства)
+        setTimeout(function() {
+            if (window.navigator.userAgent.includes('Mobile')) {
+                window.close();
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

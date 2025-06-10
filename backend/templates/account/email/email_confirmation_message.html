@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подтверждение email - AsuLinkApp</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2874A6;
+            margin-bottom: 10px;
+        }
+        .welcome {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .confirm-button {
+            display: inline-block;
+            background-color: #2874A6;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .confirm-button:hover {
+            background-color: #1f5f8b;
+        }
+        .verification-code {
+            display: inline-block;
+            background-color: #f8f9fa;
+            border: 3px solid #2874A6;
+            color: #2874A6;
+            padding: 20px 30px;
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 8px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .alternative-link {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            word-break: break-all;
+            font-size: 14px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        .expiration {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔗 AsuLinkApp</div>
+            <h1 class="welcome">Добро пожаловать!</h1>
+        </div>
+        
+        <div class="message">
+            <p>Здравствуйте!</p>
+
+            <p>Спасибо за интерес к AsuLinkApp! Для подтверждения вашего email адреса введите код в приложении:</p>
+        </div>
+
+        <div class="button-container">
+            <div class="verification-code">
+                {{ verification_code }}
+            </div>
+        </div>
+
+        <div class="expiration">
+            ⏰ <strong>Важно:</strong> Этот код действителен в течение 15 минут.
+        </div>
+
+        <div class="alternative-link">
+            <strong>Инструкция:</strong><br>
+            1. Откройте приложение AsuLinkApp<br>
+            2. Введите этот код в поле "Код подтверждения"<br>
+            3. Нажмите "Подтвердить"<br>
+            4. Заполните профиль для завершения регистрации
+        </div>
+        
+        <div class="footer">
+            <p>Если вы не регистрировались в AsuLinkApp, просто проигнорируйте это письмо.</p>
+            <p><strong>С уважением,<br>Команда AsuLinkApp</strong></p>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+            <p style="font-size: 12px; color: #999;">
+                Это автоматическое письмо, пожалуйста, не отвечайте на него.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

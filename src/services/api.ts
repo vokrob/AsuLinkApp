@@ -1,9 +1,15 @@
-const API_URL = 'http://127.0.0.1:8000/api';
+// API service for AsuLinkApp - Works on physical devices and emulators
+import { Platform } from 'react-native';
 
-// Storage for auth token
+// Simplified API URL configuration - single working address
+const API_URL = 'http://192.168.1.73:8000/api';
+
+console.log(`🔗 API URL for ${Platform.OS}: ${API_URL}`);
+
+// Token storage
 let authToken: string | null = null;
 
-// Helper function to get headers with auth token
+// Request headers
 const getHeaders = (includeAuth: boolean = true) => {
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -16,29 +22,32 @@ const getHeaders = (includeAuth: boolean = true) => {
     return headers;
 };
 
-// Authentication functions
+// Login function
 export const login = async (username: string, password: string) => {
     try {
-        const response = await fetch(`${API_URL}/auth/login/`, {
+        console.log('🔗 Login attempt for user:', username);
+
+        const result = await makeApiRequest('/auth/login/', {
             method: 'POST',
-            headers: getHeaders(false),
-            body: JSON.stringify({ username, password }),
+            body: { username, password }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            authToken = data.token;
-            return data;
+        if (result.success) {
+            authToken = result.data.token;
+            console.log('✅ Login successful');
+            return result.data;
         } else {
-            const error = await response.json();
-            throw new Error(error.error || 'Login failed');
+            const errorMessage = result.data?.error || 'Login error';
+            console.error('❌ Login error:', errorMessage);
+            throw new Error(errorMessage);
         }
-    } catch (error) {
-        console.error('Ошибка при входе:', error);
-        throw error;
+    } catch (error: any) {
+        console.error('❌ Critical login error:', error.message);
+        throw new Error(error.message || 'Failed to login. Check credentials and connection.');
     }
 };
 
+// МОБИЛЬНАЯ регистрация с кодом (3 шага)
 export const register = async (userData: {
     username: string;
     email: string;
@@ -47,26 +56,221 @@ export const register = async (userData: {
     last_name?: string;
 }) => {
     try {
-        const response = await fetch(`${API_URL}/auth/register/`, {
+        console.log('🔗 Мобильная регистрация - отправка кода');
+        console.log('📝 Email:', userData.email);
+
+        // Шаг 1: Отправляем код на email
+        const result = await makeApiRequest('/auth/register/', {
             method: 'POST',
-            headers: getHeaders(false),
-            body: JSON.stringify(userData),
+            body: userData
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            authToken = data.token;
-            return data;
+        if (result.success) {
+            console.log('✅ Код отправлен на email');
+            return {
+                ...result.data,
+                step: 'verify_code',
+                userData: userData // Сохраняем данные для следующего шага
+            };
         } else {
-            const error = await response.json();
-            throw new Error(error.error || 'Registration failed');
+            const errorMessage = result.data?.error || 'Ошибка отправки кода';
+            console.error('❌ Ошибка отправки кода:', errorMessage);
+            throw new Error(errorMessage);
         }
-    } catch (error) {
-        console.error('Ошибка при регистрации:', error);
-        throw error;
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка при регистрации:', error.message);
+
+        // Специальная обработка таймаута при регистрации
+        if (error.message && error.message.includes('Таймаут при регистрации')) {
+            throw new Error('Возможно, регистрация прошла успешно, но ответ не дошел из-за медленного соединения. Проверьте почту - если код пришел, введите его.');
+        }
+
+        throw new Error(error.message || 'Не удалось отправить код. Проверьте соединение с сервером.');
     }
 };
 
+// Функция проверки статуса email
+export const checkEmailStatus = async (email: string) => {
+    try {
+        console.log('🔍 Проверка статуса email:', email);
+
+        const result = await makeApiRequest(`/auth/check-email-status/?email=${encodeURIComponent(email)}`, {
+            method: 'GET'
+        });
+
+        if (result.success) {
+            console.log('✅ Статус email получен');
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Ошибка проверки статуса';
+            console.error('❌ Ошибка проверки статуса:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка при проверке статуса:', error.message);
+        throw new Error(error.message || 'Не удалось проверить статус email.');
+    }
+};
+
+// Функция повторной отправки письма с подтверждением
+export const resendConfirmation = async (email: string) => {
+    try {
+        console.log('📧 Повторная отправка подтверждения на:', email);
+
+        const result = await makeApiRequest('/auth/resend-confirmation/', {
+            method: 'POST',
+            body: { email }
+        });
+
+        if (result.success) {
+            console.log('✅ Письмо с подтверждением отправлено повторно');
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Ошибка отправки письма';
+            console.error('❌ Ошибка отправки письма:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка при отправке письма:', error.message);
+        throw new Error(error.message || 'Не удалось отправить письмо с подтверждением.');
+    }
+};
+
+// Новые функции для 3-шагового процесса регистрации
+
+// Упрощенная функция для выполнения запросов к единственному серверу
+const makeApiRequest = async (endpoint: string, options: any = {}) => {
+    const { method = 'GET', body, headers = {} } = options;
+
+    // Стандартные заголовки
+    const defaultHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...headers
+    };
+
+    try {
+        const url = `${API_URL}${endpoint}`;
+        console.log(`🔗 Запрос: ${method} ${url}`);
+
+        const controller = new AbortController();
+        // Увеличиваем таймаут для регистрации (отправка email может занять время)
+        const timeoutDuration = endpoint.includes('/auth/register/') ? 30000 : 15000;
+        const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
+
+        const response = await fetch(url, {
+            method,
+            headers: defaultHeaders,
+            body: body ? JSON.stringify(body) : undefined,
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        console.log(`📡 Ответ: ${response.status} ${response.statusText}`);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ Успешный запрос`);
+            return { success: true, data, status: response.status };
+        } else {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.log(`⚠️  Ошибка ${response.status}: ${JSON.stringify(errorData)}`);
+            return { success: false, data: errorData, status: response.status };
+        }
+    } catch (error: any) {
+        const errorType = error.name === 'AbortError' ? 'Timeout' : (error.message || error.name);
+        console.log(`❌ Ошибка запроса: ${errorType}`);
+
+        // Специальная обработка таймаута при регистрации
+        if (error.name === 'AbortError' && endpoint.includes('/auth/register/')) {
+            throw new Error('Таймаут при регистрации. Если код пришел на почту, попробуйте ввести его.');
+        }
+
+        throw new Error(`Не удалось подключиться к серверу: ${errorType}`);
+    }
+};
+
+// УПРОЩЕННАЯ функция отправки кода на email
+export const sendEmailCode = async (email: string) => {
+    try {
+        console.log('📧 Отправка кода верификации на email:', email);
+
+        const result = await makeApiRequest('/auth/send-code/', {
+            method: 'POST',
+            body: { email }
+        });
+
+        if (result.success) {
+            console.log('✅ Код успешно отправлен на email');
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Ошибка отправки кода';
+            console.error('❌ Ошибка отправки кода:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка при отправке кода:', error.message);
+        throw new Error(error.message || 'Не удалось отправить код. Проверьте соединение с сервером.');
+    }
+};
+
+// Функция проверки кода для Django Allauth регистрации
+export const verifyEmailCode = async (email: string, code: string) => {
+    try {
+        console.log('🔍 Проверка кода верификации для Django Allauth:', code);
+
+        const result = await makeApiRequest('/auth/verify-code/', {
+            method: 'POST',
+            body: { email, code }
+        });
+
+        if (result.success) {
+            console.log('✅ Код успешно подтвержден');
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Неверный код верификации';
+            console.error('❌ Ошибка проверки кода:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка при проверке кода:', error.message);
+        throw new Error(error.message || 'Не удалось проверить код. Попробуйте еще раз.');
+    }
+};
+
+// УПРОЩЕННАЯ функция завершения регистрации
+export const completeProfile = async (profileData: {
+    email: string;
+    username: string;
+    password: string;
+    first_name?: string;
+    last_name?: string;
+}) => {
+    try {
+        console.log('👤 Завершение регистрации для:', profileData.username);
+
+        const result = await makeApiRequest('/auth/complete-profile/', {
+            method: 'POST',
+            body: profileData
+        });
+
+        if (result.success) {
+            authToken = result.data.token;
+            console.log('✅ Регистрация успешно завершена');
+            console.log('🔑 Токен получен');
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Ошибка завершения регистрации';
+            console.error('❌ Ошибка завершения регистрации:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка при завершении регистрации:', error.message);
+        throw new Error(error.message || 'Не удалось завершить регистрацию. Попробуйте еще раз.');
+    }
+};
+
+// Функция выхода
 export const logout = async () => {
     try {
         if (authToken) {
@@ -82,18 +286,18 @@ export const logout = async () => {
     }
 };
 
-// Posts functions
+// Функция получения постов
 export const fetchPosts = async () => {
     try {
         const response = await fetch(`${API_URL}/posts/`, {
-            headers: getHeaders(false), // Posts can be viewed without auth
+            headers: getHeaders(false),
         });
 
         if (response.ok) {
             const data = await response.json();
-            return data.results || data; // Handle paginated response
+            return data.results || data;
         } else {
-            throw new Error('Failed to fetch posts');
+            throw new Error('Ошибка получения постов');
         }
     } catch (error) {
         console.error('Ошибка при получении постов:', error);
@@ -101,112 +305,31 @@ export const fetchPosts = async () => {
     }
 };
 
-export const createPost = async (content: string, image?: string) => {
-    try {
-        const formData = new FormData();
-        formData.append('content', content);
-
-        if (image) {
-            formData.append('image', image);
-        }
-
-        const response = await fetch(`${API_URL}/posts/`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Token ${authToken}`,
-                // Don't set Content-Type for FormData
-            },
-            body: formData,
-        });
-
-        if (response.ok) {
-            return await response.json();
-        } else {
-            throw new Error('Failed to create post');
-        }
-    } catch (error) {
-        console.error('Ошибка при создании поста:', error);
-        throw error;
-    }
-};
-
-export const likePost = async (postId: string) => {
-    try {
-        const response = await fetch(`${API_URL}/posts/${postId}/like/`, {
-            method: 'POST',
-            headers: getHeaders(),
-        });
-
-        if (response.ok) {
-            return await response.json();
-        } else {
-            throw new Error('Failed to like post');
-        }
-    } catch (error) {
-        console.error('Ошибка при лайке поста:', error);
-        throw error;
-    }
-};
-
-// Comments functions
-export const fetchComments = async (postId: string) => {
-    try {
-        const response = await fetch(`${API_URL}/posts/${postId}/comments/`, {
-            headers: getHeaders(false),
-        });
-
-        if (response.ok) {
-            return await response.json();
-        } else {
-            throw new Error('Failed to fetch comments');
-        }
-    } catch (error) {
-        console.error('Ошибка при получении комментариев:', error);
-        throw error;
-    }
-};
-
-export const createComment = async (postId: string, content: string) => {
-    try {
-        const response = await fetch(`${API_URL}/posts/${postId}/comments/`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify({ content }),
-        });
-
-        if (response.ok) {
-            return await response.json();
-        } else {
-            throw new Error('Failed to create comment');
-        }
-    } catch (error) {
-        console.error('Ошибка при создании комментария:', error);
-        throw error;
-    }
-};
-
-// User profile functions
-export const fetchUserProfile = async () => {
-    try {
-        const response = await fetch(`${API_URL}/profile/`, {
-            headers: getHeaders(),
-        });
-
-        if (response.ok) {
-            return await response.json();
-        } else {
-            throw new Error('Failed to fetch user profile');
-        }
-    } catch (error) {
-        console.error('Ошибка при получении профиля:', error);
-        throw error;
-    }
-};
-
-// Set auth token (for when app starts and token is loaded from storage)
+// Установка токена
 export const setAuthToken = (token: string | null) => {
     authToken = token;
 };
 
-// Get current auth token
+// Получение токена
 export const getAuthToken = () => authToken;
+
+// Упрощенная функция тестирования соединения
+export const testConnection = async () => {
+    console.log('🔍 Тестирование соединения с сервером...');
+    console.log(`🔗 URL: ${API_URL}`);
+
+    try {
+        const result = await makeApiRequest('/', { method: 'GET' });
+
+        if (result.success) {
+            console.log('✅ Соединение с сервером установлено!');
+            return { success: true, url: API_URL };
+        } else {
+            console.log('❌ Сервер не отвечает');
+            return { success: false, url: null };
+        }
+    } catch (error: any) {
+        console.error('❌ Ошибка подключения:', error.message);
+        return { success: false, url: null };
+    }
+};

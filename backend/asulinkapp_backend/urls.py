@@ -18,12 +18,35 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+from django.shortcuts import render
+
+def api_info(request):
+    """Simple main page with API information"""
+    return JsonResponse({
+        'message': 'AsuLinkApp Backend API',
+        'version': '1.0.0',
+        'endpoints': {
+            'admin': '/admin/',
+            'api_posts': '/api/posts/',
+            'api_auth_register': '/api/auth/register/',
+            'api_auth_login': '/api/auth/login/',
+            'api_profile': '/api/profile/',
+        },
+        'status': 'running'
+    })
+
+def email_confirmed_view(request):
+    """Email confirmation success page"""
+    return render(request, 'account/email_confirmed.html')
 
 urlpatterns = [
+    path('', api_info, name='api_info'),  # Main page
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('accounts/', include('allauth.urls')),
     path('auth/', include('rest_framework.urls')),
+    path('email-confirmed/', email_confirmed_view, name='email_confirmed'),
 ]
 
 # Serve media files in development

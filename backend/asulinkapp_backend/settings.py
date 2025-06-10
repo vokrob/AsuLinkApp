@@ -26,7 +26,23 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure--)hgd)#nuy%r2p3&pv8*^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+# Разрешенные хосты для разработки и продакшена
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '10.0.2.2',  # Android эмулятор
+
+    # Распространенные IP адреса локальных сетей
+    '192.168.1.100',
+    '192.168.1.73',
+    '192.168.0.100',
+    '192.168.155.1',
+    '10.0.0.100',
+
+    # В разработке разрешаем все хосты для удобства тестирования
+    '*' if DEBUG else 'your-production-domain.com'
+]
 
 
 # Application definition
@@ -72,7 +88,7 @@ ROOT_URLCONF = 'asulinkapp_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -159,19 +175,51 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS Configuration
+# CORS Configuration для физических устройств и эмуляторов
 CORS_ALLOWED_ORIGINS = [
+    # Localhost для разработки
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8081",
     "http://127.0.0.1:8081",
     "http://localhost:19006",
     "http://127.0.0.1:19006",
+
+    # Android эмулятор
+    "http://10.0.2.2:8081",
+    "http://10.0.2.2:19006",
+
+    # Физические устройства - распространенные IP адреса локальных сетей
+    "http://192.168.1.100:8081",
+    "http://192.168.1.100:19006",
+    "http://192.168.0.100:8081",
+    "http://192.168.0.100:19006",
+    "http://192.168.155.1:8081",
+    "http://192.168.155.1:19006",
+    "http://10.0.0.100:8081",
+    "http://10.0.0.100:19006",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in development
+# В разработке разрешаем все origins для удобства тестирования на физических устройствах
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+# Дополнительные настройки CORS для мобильных устройств
+CORS_ALLOW_PRIVATE_NETWORK = True  # Разрешаем запросы из приватных сетей
+
+# Additional CORS settings for React Native
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Django Allauth Configuration
 AUTHENTICATION_BACKENDS = [
@@ -179,18 +227,46 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+# Django Allauth настройки для стандартной email верификации
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Можно входить по username или email
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Обязательная верификация email через ссылку
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # Подтверждение по GET запросу
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False  # Не входить автоматически после подтверждения
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False  # Упрощаем форму регистрации
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3  # Ссылка действительна 3 дня
+ACCOUNT_EMAIL_CONFIRMATION_HMAC = True  # Более безопасные ссылки подтверждения
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Для разработки
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '[AsuLinkApp] '
 
-# Email Configuration (for development)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Настройки для мобильного приложения
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/email-confirmed/'  # Куда перенаправлять после подтверждения
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/email-confirmed/'
+
+# Новый формат для ограничения попыток входа (Django Allauth 0.57+)
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': '5/5m',  # 5 попыток за 5 минут
+}
+
+# Email настройки для Django Allauth
+# Для разработки можно использовать console backend или настроить реальный SMTP
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+
+# SMTP настройки (для реальной отправки email)
+if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    print(f"📧 Email: Настроен SMTP через {EMAIL_HOST}")
+else:
+    print("📧 Email: Настроен вывод в консоль (разработка)")
+
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='AsuLinkApp <noreply@asulinkapp.com>')
 
 # Media files configuration
 MEDIA_URL = '/media/'
