@@ -11,6 +11,7 @@ import {
     TextInput,
 } from 'react-native';
 import { verifyEmailCode, resendConfirmation, setAuthToken } from '../services/api';
+import { saveData, KEYS } from '../utils/storage';
 
 interface CodeVerificationScreenProps {
     navigation: any;
@@ -93,34 +94,48 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
             
             console.log('✅ Код подтвержден:', response);
 
-            // Сохраняем токен если он есть
+            // Сохраняем токен и данные пользователя если они есть
             if (response.token) {
                 setAuthToken(response.token);
+
+                // Сохраняем токен в хранилище
+                console.log('💾 Saving auth token...');
+                const tokenSaved = await saveData(KEYS.AUTH_TOKEN, response.token);
+                if (!tokenSaved) {
+                    console.warn('⚠️ Failed to save token to storage');
+                }
+
+                // Сохраняем данные пользователя если они есть
+                if (response.user) {
+                    console.log('💾 Saving user profile...');
+                    const profileSaved = await saveData(KEYS.USER_PROFILE, response.user);
+                    if (!profileSaved) {
+                        console.warn('⚠️ Failed to save user profile to storage');
+                    }
+                }
             }
 
-            Alert.alert(
-                '🎉 Успешно!',
-                response.message || 'Email успешно подтвержден! Добро пожаловать в AsuLinkApp!',
-                [
-                    {
-                        text: 'Продолжить',
-                        onPress: () => {
-                            // Переходим к главному экрану или экрану входа
-                            if (response.token) {
-                                navigation.reset({
-                                    index: 0,
-                                    routes: [{ name: 'Main' }],
-                                });
-                            } else {
-                                navigation.reset({
-                                    index: 0,
-                                    routes: [{ name: 'Login' }],
-                                });
-                            }
+            // Автоматически переходим на экран заполнения профиля или в главное приложение
+            if (response.token) {
+                // Если есть токен, переходим на заполнение профиля
+                navigation.reset({
+                    index: 0,
+                    routes: [{
+                        name: 'ProfileSetup',
+                        params: {
+                            email: email,
+                            username: username,
+                            token: response.token
                         }
-                    }
-                ]
-            );
+                    }],
+                });
+            } else {
+                // Если токена нет, возвращаемся на экран входа
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                });
+            }
 
         } catch (error: any) {
             console.error('❌ Ошибка проверки кода:', error);
@@ -152,7 +167,7 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
             inputRefs.current[0]?.focus();
             
             Alert.alert(
-                '📧 Код отправлен!',
+                'Код отправлен!',
                 'Новый код подтверждения отправлен на ваш email.'
             );
         } catch (error: any) {
@@ -181,24 +196,9 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
             </View>
 
             <View style={styles.middleContainer}>
-                <View style={styles.codeIcon}>
-                    <Text style={styles.codeIconText}>🔐</Text>
-                </View>
-
                 <Text style={styles.mainMessage}>
                     Введите код подтверждения
                 </Text>
-
-                <View style={styles.emailInfo}>
-                    <Text style={styles.emailLabel}>Код отправлен на:</Text>
-                    <Text style={styles.emailValue}>{email}</Text>
-                    {username && (
-                        <>
-                            <Text style={styles.emailLabel}>Пользователь:</Text>
-                            <Text style={styles.emailValue}>{username}</Text>
-                        </>
-                    )}
-                </View>
 
                 <Text style={styles.instructions}>
                     Проверьте вашу почту и введите 6-значный код подтверждения
@@ -246,7 +246,7 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
                         {isLoading ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.buttonText}>✅ Подтвердить код</Text>
+                            <Text style={styles.buttonText}>Подтвердить код</Text>
                         )}
                     </TouchableOpacity>
 
@@ -258,7 +258,7 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
                         {isResending ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.buttonText}>📧 Отправить повторно</Text>
+                            <Text style={styles.buttonText}>Отправить повторно</Text>
                         )}
                     </TouchableOpacity>
 
@@ -266,7 +266,7 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
                         style={[styles.button, styles.backButton]}
                         onPress={handleBackToLogin}
                     >
-                        <Text style={styles.buttonText}>← Назад к входу</Text>
+                        <Text style={styles.buttonText}>Назад к входу</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -315,13 +315,7 @@ const styles = StyleSheet.create({
         color: '#0c54a0',
         fontWeight: 'bold',
     },
-    codeIcon: {
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    codeIconText: {
-        fontSize: 60,
-    },
+
     mainMessage: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -329,24 +323,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: '#333',
     },
-    emailInfo: {
-        backgroundColor: '#f8f9fa',
-        padding: 15,
-        borderRadius: 8,
-        marginBottom: 20,
-        alignItems: 'center',
-    },
-    emailLabel: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 5,
-    },
-    emailValue: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 10,
-    },
+
     instructions: {
         fontSize: 16,
         textAlign: 'center',

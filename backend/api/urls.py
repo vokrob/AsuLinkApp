@@ -10,6 +10,9 @@ urlpatterns = [
     # Test endpoint
     path('test/', views.test_api, name='test-api'),
 
+    # Role checking
+    path('auth/check-role/', views.check_user_role, name='check-user-role'),
+
     # Authentication
     path('auth/login/', views.login_view, name='login'),
     path('auth/logout/', views.logout_view, name='logout'),

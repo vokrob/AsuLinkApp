@@ -5,17 +5,35 @@ from accounts.models import UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    full_name = serializers.ReadOnlyField()
+    role_display = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProfile
-        fields = ['avatar', 'bio', 'birth_date', 'location', 'website', 'avatar_url']
+        fields = [
+            'role', 'role_display', 'avatar', 'bio', 'birth_date', 'avatar_url', 'full_name',
+            # Поля для студентов
+            'faculty', 'group', 'course',
+            # Поля для преподавателей
+            'department', 'position'
+        ]
+
+    def get_role_display(self, obj):
+        """Возвращает человекочитаемое название роли"""
+        return dict(UserProfile.ROLE_CHOICES).get(obj.role, obj.role)
 
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
-    
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile', 'full_name']
+
+    def get_full_name(self, obj):
+        """Возвращает полное имя пользователя"""
+        return obj.get_full_name() or obj.username
 
 
 class CommentSerializer(serializers.ModelSerializer):

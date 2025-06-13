@@ -238,6 +238,53 @@ export const verifyEmailCode = async (email: string, code: string) => {
     }
 };
 
+// Получение информации о текущем пользователе
+export const getCurrentUser = async () => {
+    try {
+        console.log('👤 Получение информации о текущем пользователе');
+
+        const result = await makeApiRequest('/auth/me/', {
+            method: 'GET'
+        });
+
+        if (result.success) {
+            console.log('✅ Информация о пользователе получена');
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Ошибка получения данных пользователя';
+            console.error('❌ Ошибка получения данных пользователя:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка получения данных пользователя:', error.message);
+        throw new Error(error.message || 'Не удалось получить данные пользователя');
+    }
+};
+
+// Проверка роли пользователя по email
+export const checkUserRole = async (email: string) => {
+    try {
+        console.log('🔍 Проверка роли пользователя для email:', email);
+
+        const result = await makeApiRequest('/auth/check-role/', {
+            method: 'POST',
+            body: { email }
+        });
+
+        if (result.success) {
+            console.log('✅ Роль пользователя определена:', result.data.role_display);
+            return result.data;
+        } else {
+            const errorMessage = result.data?.error || 'Ошибка определения роли';
+            console.error('❌ Ошибка определения роли:', errorMessage);
+            throw new Error(errorMessage);
+        }
+    } catch (error: any) {
+        console.error('❌ Критическая ошибка определения роли:', error.message);
+        throw new Error(error.message || 'Не удалось определить роль пользователя');
+    }
+};
+
 // УПРОЩЕННАЯ функция завершения регистрации
 export const completeProfile = async (profileData: {
     email: string;

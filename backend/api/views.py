@@ -198,6 +198,36 @@ def test_api(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+def check_user_role(request):
+    """Определяет роль пользователя по email адресу"""
+    try:
+        email = request.data.get('email')
+
+        if not email:
+            return Response({
+                'error': 'Email обязателен'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Определяем роль по email
+        from accounts.models import UserProfile
+        role = UserProfile.determine_role_by_email(email)
+        role_display = 'Преподаватель' if role == 'professor' else 'Студент'
+
+        return Response({
+            'email': email,
+            'role': role,
+            'role_display': role_display,
+            'is_teacher': role == 'professor'
+        })
+
+    except Exception as e:
+        return Response({
+            'error': f'Ошибка сервера: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
 def send_email_code(request):
     """Шаг 1: Отправка кода на email"""
     try:

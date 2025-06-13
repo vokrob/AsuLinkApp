@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Checkbox } from 'expo-checkbox';
 import { login, register, setAuthToken } from '../services/api';
-import { saveData, KEYS } from '../utils/storage';
+import { saveData, loadData, KEYS } from '../utils/storage';
 
 const LoginScreen = ({ navigation }: any) => {
     // Mode state
@@ -19,8 +19,6 @@ const LoginScreen = ({ navigation }: any) => {
     const [regUsername, setRegUsername] = useState('');
     const [regPassword, setRegPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
 
     // Validation state
     const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -101,16 +99,22 @@ const LoginScreen = ({ navigation }: any) => {
             }
             setAuthToken(response.token);
 
-            // Save user data
-            console.log('💾 Saving user profile...');
-            const profileSaved = await saveData(KEYS.USER_PROFILE, response.user);
-            if (!profileSaved) {
-                console.warn('⚠️ Failed to save user profile to storage');
+            // Проверяем, есть ли уже сохраненный профиль
+            const existingProfile = await loadData(KEYS.USER_PROFILE, null);
+
+            if (!existingProfile) {
+                // Сохраняем профиль только если его еще нет
+                console.log('💾 Saving user profile (first time)...');
+                const profileSaved = await saveData(KEYS.USER_PROFILE, response.user);
+                if (!profileSaved) {
+                    console.warn('⚠️ Failed to save user profile to storage');
+                }
+            } else {
+                console.log('ℹ️ Profile already exists, keeping existing data');
             }
 
-            Alert.alert('Успех', 'Вход выполнен успешно!', [
-                { text: 'OK', onPress: () => navigation.replace('Main') }
-            ]);
+            // Автоматически переходим в главное приложение без сообщения
+            navigation.replace('Main');
 
         } catch (error: any) {
             Alert.alert('Ошибка входа', error.message || 'Неправильное имя пользователя или пароль');
@@ -131,9 +135,7 @@ const LoginScreen = ({ navigation }: any) => {
             const userData = {
                 username: regUsername,
                 email: email,
-                password: regPassword,
-                first_name: firstName,
-                last_name: lastName
+                password: regPassword
             };
 
             const response = await register(userData);
@@ -142,20 +144,12 @@ const LoginScreen = ({ navigation }: any) => {
 
             // Проверяем, что регистрация прошла успешно и требуется подтверждение кода
             if (response.verification_code_sent || response.email_confirmation_sent || response.requires_verification) {
-                Alert.alert(
-                    '📧 Код отправлен!',
-                    response.message || 'Код подтверждения отправлен на ваш email. Проверьте почту и введите код в приложении.',
-                    [
-                        {
-                            text: 'Ввести код',
-                            onPress: () => navigation.navigate('CodeVerification', {
-                                email: email,
-                                username: regUsername,
-                                next_step: response.next_step || 'enter_code'
-                            })
-                        }
-                    ]
-                );
+                // Автоматически переходим на страницу подтверждения кода без показа сообщения
+                navigation.navigate('CodeVerification', {
+                    email: email,
+                    username: regUsername,
+                    next_step: response.next_step || 'enter_code'
+                });
             } else {
                 // Fallback для старого формата
                 Alert.alert(
@@ -184,14 +178,13 @@ const LoginScreen = ({ navigation }: any) => {
             const alertButtons = [{ text: 'OK' }];
 
             if (showCodeOption) {
-                alertButtons.unshift({
-                    text: 'Ввести код',
-                    onPress: () => navigation.navigate('CodeVerification', {
-                        email: email,
-                        username: regUsername,
-                        next_step: 'enter_code'
-                    })
+                // Автоматически переходим на страницу подтверждения кода
+                navigation.navigate('CodeVerification', {
+                    email: email,
+                    username: regUsername,
+                    next_step: 'enter_code'
                 });
+                return; // Выходим из функции, не показывая Alert
             }
 
             Alert.alert('Ошибка регистрации', errorMessage, alertButtons);
@@ -204,22 +197,7 @@ const LoginScreen = ({ navigation }: any) => {
         Alert.alert('Восстановить пароль', 'Функция в разработке');
     };
 
-    const toggleMode = () => {
-        setIsLoginMode(!isLoginMode);
-        setErrors({});
-        // Clear form fields when switching modes
-        if (isLoginMode) {
-            setUsername('');
-            setPassword('');
-        } else {
-            setEmail('');
-            setRegUsername('');
-            setRegPassword('');
-            setConfirmPassword('');
-            setFirstName('');
-            setLastName('');
-        }
-    };
+
 
     const renderLoginForm = () => (
         <>
@@ -278,7 +256,7 @@ const LoginScreen = ({ navigation }: any) => {
     const renderRegistrationForm = () => (
         <>
             <TextInput
-                placeholder="email *"
+                placeholder="email"
                 value={email}
                 onChangeText={setEmail}
                 style={[styles.input, errors.email && styles.inputError]}
@@ -289,7 +267,7 @@ const LoginScreen = ({ navigation }: any) => {
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
             <TextInput
-                placeholder="имя пользователя *"
+                placeholder="имя пользователя"
                 value={regUsername}
                 onChangeText={setRegUsername}
                 style={[styles.input, errors.regUsername && styles.inputError]}
@@ -298,25 +276,8 @@ const LoginScreen = ({ navigation }: any) => {
             />
             {errors.regUsername && <Text style={styles.errorText}>{errors.regUsername}</Text>}
 
-            <View style={styles.nameContainer}>
-                <TextInput
-                    placeholder="имя"
-                    value={firstName}
-                    onChangeText={setFirstName}
-                    style={[styles.nameInput, errors.firstName && styles.inputError]}
-                    editable={!isLoading}
-                />
-                <TextInput
-                    placeholder="фамилия"
-                    value={lastName}
-                    onChangeText={setLastName}
-                    style={[styles.nameInput, errors.lastName && styles.inputError]}
-                    editable={!isLoading}
-                />
-            </View>
-
             <TextInput
-                placeholder="пароль *"
+                placeholder="пароль"
                 value={regPassword}
                 onChangeText={setRegPassword}
                 secureTextEntry
@@ -326,7 +287,7 @@ const LoginScreen = ({ navigation }: any) => {
             {errors.regPassword && <Text style={styles.errorText}>{errors.regPassword}</Text>}
 
             <TextInput
-                placeholder="подтвердите пароль *"
+                placeholder="подтвердите пароль"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
@@ -399,29 +360,23 @@ const LoginScreen = ({ navigation }: any) => {
 
                 {/* Form Content */}
                 {isLoginMode ? renderLoginForm() : renderRegistrationForm()}
+            </View>
 
-                {/* Switch Mode Link */}
-                <TouchableOpacity onPress={toggleMode} disabled={isLoading} style={styles.switchModeContainer}>
-                    <Text style={styles.switchModeText}>
-                        {isLoginMode
-                            ? 'Нет аккаунта? Зарегистрироваться'
-                            : 'Уже есть аккаунт? Войти'
-                        }
+            {!isLoginMode && (
+                <View style={styles.bottomContainer}>
+                    <Text style={styles.hintText}>
+                        После регистрации на ваш email будет отправлено письмо с кодом подтверждения.
                     </Text>
-                </TouchableOpacity>
-            </View>
+                </View>
+            )}
 
-            <View style={styles.bottomContainer}>
-                <Text style={styles.hintText}>
-                    {isLoginMode
-                        ? 'Имя пользователя может быть в виде логин, домен\\логин или login@domain.asu.ru.\nДля студентов используется домен STUD.'
-                        : 'Поля отмеченные * обязательны для заполнения.\nПосле регистрации на ваш email будет отправлено письмо для подтверждения.'
-                    }
-                </Text>
-
-
-            </View>
-
+            {isLoginMode && (
+                <View style={styles.bottomContainer}>
+                    <Text style={styles.hintText}>
+                        Для восстановления пароля нажмите "восстановить пароль". На ваш email будет отправлена ссылка для сброса пароля.
+                    </Text>
+                </View>
+            )}
 
         </ScrollView>
     );
@@ -434,31 +389,33 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         flexGrow: 1,
+        justifyContent: 'space-between',
     },
     topContainer: {
-        minHeight: 250,
-        justifyContent: 'flex-start',
+        flex: 0.3,
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 50,
-        paddingBottom: 20,
+        paddingTop: 20,
+        paddingBottom: 10,
     },
     middleContainer: {
-        flex: 1,
+        flex: 0.5,
         justifyContent: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 20,
+        paddingVertical: 10,
     },
     bottomContainer: {
-        minHeight: 100,
-        justifyContent: 'flex-end',
+        flex: 0.2,
+        justifyContent: 'center',
         paddingHorizontal: 20,
-        paddingBottom: 30,
+        paddingVertical: 15,
     },
+
     logo: {
-        width: 120,
-        height: 120,
+        width: 130,
+        height: 130,
         resizeMode: 'contain',
-        marginBottom: 10,
+        marginBottom: 15,
         alignSelf: 'center',
     },
     title1: {
@@ -468,7 +425,7 @@ const styles = StyleSheet.create({
         color: '#497fb8',
     },
     title2: {
-        fontSize: 22,
+        fontSize: 21,
         marginBottom: 8,
         textAlign: 'center',
         color: '#0c54a0',
@@ -476,13 +433,14 @@ const styles = StyleSheet.create({
     },
     title3: {
         fontSize: 16,
-        marginBottom: 20,
+        marginBottom: 0,
         textAlign: 'center',
         color: '#0c54a0',
     },
     modeToggleContainer: {
         flexDirection: 'row',
-        marginBottom: 20,
+        marginBottom: 25,
+        marginTop: 10,
         borderRadius: 8,
         backgroundColor: '#f0f0f0',
         padding: 2,
@@ -518,20 +476,7 @@ const styles = StyleSheet.create({
         borderColor: '#ff4444',
         borderWidth: 2,
     },
-    nameContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    nameInput: {
-        height: 50,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 15,
-        marginVertical: 8,
-        fontSize: 16,
-        flex: 0.48,
-    },
+
     errorText: {
         color: '#ff4444',
         fontSize: 14,
@@ -568,21 +513,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 16,
     },
-    switchModeContainer: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
-    switchModeText: {
-        color: '#0c54a0',
-        fontSize: 16,
-        textAlign: 'center',
-    },
     hintText: {
         fontSize: 12,
         color: 'gray',
         textAlign: 'center',
         lineHeight: 16,
     },
+
     modalContainer: {
         flex: 1,
         backgroundColor: '#fff',

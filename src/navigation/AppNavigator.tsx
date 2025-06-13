@@ -13,7 +13,13 @@ import MapScreen from '../screens/MapScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import CodeVerificationScreen from '../screens/CodeVerificationScreen';
 import EmailConfirmationScreen from '../screens/EmailConfirmationScreen';
+import ProfileSetupScreen from '../screens/ProfileSetupScreen';
+import RightSideMenu from '../components/Menu/RightSideMenu';
 import { useTheme } from '../contexts/ThemeContext';
+import { MenuProvider, useMenu } from '../contexts/MenuContext';
+import { useState } from 'react';
+import { View, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -28,6 +34,11 @@ export type RootStackParamList = {
     email: string;
     username?: string;
   };
+  ProfileSetup: {
+    email: string;
+    username: string;
+    token?: string;
+  };
 };
 
 export type MainTabParamList = {
@@ -41,21 +52,34 @@ export type MainTabParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const MainTabNavigator = () => {
-  const { theme } = useTheme();
+const MainTabNavigatorContent = () => {
+  const { theme, isDarkTheme, toggleTheme } = useTheme();
+  const { rightMenuVisible, setRightMenuVisible, toggleRightMenu } = useMenu();
+  const navigation = useNavigation();
+
+  const handleSettingsPress = () => {
+    setRightMenuVisible(false);
+    navigation.navigate('Settings' as never);
+  };
+
+  const handleSupportPress = () => {
+    setRightMenuVisible(false);
+    Alert.alert('Поддержка', 'Функция в разработке');
+  };
 
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: theme.background,
-          borderTopColor: theme.border,
-        },
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.secondaryText,
-      }}
-    >
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: theme.background,
+            borderTopColor: theme.border,
+          },
+          tabBarActiveTintColor: theme.primary,
+          tabBarInactiveTintColor: theme.secondaryText,
+        }}
+      >
       <Tab.Screen
         name="Feed"
         component={FeedScreen}
@@ -107,6 +131,28 @@ const MainTabNavigator = () => {
         }}
       />
     </Tab.Navigator>
+
+    {/* Боковое меню поверх всего интерфейса */}
+    {rightMenuVisible && (
+      <RightSideMenu
+        visible={rightMenuVisible}
+        onClose={toggleRightMenu}
+        isDarkTheme={isDarkTheme}
+        onToggleTheme={toggleTheme}
+        onSettingsPress={handleSettingsPress}
+        onSupportPress={handleSupportPress}
+        isProfileScreen={false}
+      />
+    )}
+  </View>
+  );
+};
+
+const MainTabNavigator = () => {
+  return (
+    <MenuProvider>
+      <MainTabNavigatorContent />
+    </MenuProvider>
   );
 };
 
@@ -119,6 +165,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="CodeVerification" component={CodeVerificationScreen} />
         <Stack.Screen name="EmailConfirmation" component={EmailConfirmationScreen} />
+        <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

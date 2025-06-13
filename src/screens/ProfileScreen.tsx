@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import HeaderBar from '../components/Navigation/HeaderBar';
-import RightSideMenu from '../components/Menu/RightSideMenu';
 import { useTheme } from '../contexts/ThemeContext';
+import { useMenu } from '../contexts/MenuContext';
 import * as ImagePicker from 'expo-image-picker';
 import { saveData, loadData, removeData, KEYS } from '../utils/storage';
 import { useNavigation } from '@react-navigation/native';
@@ -17,12 +17,15 @@ interface UserProfile {
   id: string;
   name: string;
   avatar: any;
-  faculty: string;
-  group: string;
+  // Поля для студентов
+  faculty?: string;
+  group?: string;
+  course?: string;
+  // Поля для преподавателей
+  department?: string;
+  position?: string;
+  // Общие поля
   email: string;
-  phone: string;
-  birthDate: string;
-  about: string;
   role: 'student' | 'professor' | 'admin';
 }
 
@@ -33,20 +36,17 @@ const DEFAULT_PROFILE: UserProfile = {
   faculty: 'Институт математики и информационных технологий',
   group: '4.305-2',
   email: 'borkov.43052@asu.edu.ru',
-  phone: '+7 (960) 942-62-12',
-  birthDate: '14.10.2003',
-  about: 'Изучаю разработку мобильных приложений',
   role: 'student'
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const ProfileScreen = () => {
-  const { theme, isDarkTheme, toggleTheme } = useTheme();
+  const { theme, isDarkTheme } = useTheme();
+  const { toggleRightMenu, rightMenuVisible } = useMenu();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editField, setEditField] = useState<keyof UserProfile | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [rightMenuVisible, setRightMenuVisible] = useState(false);
   const navigation = useNavigation<NavigationProp>();
 
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
@@ -56,13 +56,18 @@ const ProfileScreen = () => {
       try {
         const existingProfile = await loadData<UserProfile | null>(KEYS.USER_PROFILE, null);
 
-        if (!existingProfile) {
-          await saveData(KEYS.USER_PROFILE, DEFAULT_PROFILE);
-          setProfile(DEFAULT_PROFILE);
-          console.log('Profile initialized with default avatar');
+        if (existingProfile) {
+          // Убеждаемся, что у профиля есть аватар
+          const profileWithAvatar = {
+            ...existingProfile,
+            avatar: existingProfile.avatar || require('../../assets/Avatar.jpg')
+          };
+          setProfile(profileWithAvatar);
+          console.log('Existing profile loaded:', profileWithAvatar);
         } else {
-          setProfile(existingProfile);
-          console.log('Existing profile loaded');
+          // Если профиля нет, используем дефолтный
+          setProfile(DEFAULT_PROFILE);
+          console.log('Profile initialized with default data');
         }
       } catch (error) {
         console.error('Error initializing profile:', error);
@@ -75,25 +80,17 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     const persistProfile = async () => {
-      await saveData(KEYS.USER_PROFILE, profile);
+      // Сохраняем профиль только если он не пустой
+      if (profile.id) {
+        await saveData(KEYS.USER_PROFILE, profile);
+        console.log('Profile saved:', profile);
+      }
     };
 
     persistProfile();
   }, [profile]);
 
-  const toggleRightMenu = () => {
-    setRightMenuVisible(!rightMenuVisible);
-  };
 
-  const handleSettingsPress = () => {
-    setRightMenuVisible(false);
-    navigation.navigate('Settings');
-  };
-
-  const handleSupportPress = () => {
-    setRightMenuVisible(false);
-    alert('Обращение в поддержку');
-  };
 
   const handleAvatarChange = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -145,10 +142,11 @@ const ProfileScreen = () => {
 
     switch (field) {
       case 'email': return <MaterialIcons name="email" size={24} color={iconColor} />;
-      case 'phone': return <MaterialIcons name="smartphone" size={24} color={iconColor} />;
       case 'faculty': return <MaterialIcons name="school" size={24} color={iconColor} />;
       case 'group': return <MaterialIcons name="group" size={24} color={iconColor} />;
-      case 'birthDate': return <MaterialIcons name="cake" size={24} color={iconColor} />;
+      case 'course': return <MaterialIcons name="grade" size={24} color={iconColor} />;
+      case 'department': return <MaterialIcons name="business" size={24} color={iconColor} />;
+      case 'position': return <MaterialIcons name="work" size={24} color={iconColor} />;
       default: return <MaterialIcons name="info" size={24} color={iconColor} />;
     }
   };
@@ -160,18 +158,6 @@ const ProfileScreen = () => {
         onMenuPress={toggleRightMenu}
         showMenuButton={true}
       />
-
-      {rightMenuVisible && (
-        <RightSideMenu
-          visible={rightMenuVisible}
-          onClose={toggleRightMenu}
-          isDarkTheme={isDarkTheme}
-          onToggleTheme={toggleTheme}
-          onSettingsPress={handleSettingsPress}
-          onSupportPress={handleSupportPress}
-          isProfileScreen={true}
-        />
-      )}
 
       <ScrollView
         style={[styles.container, { backgroundColor: theme.background }]}
@@ -205,41 +191,93 @@ const ProfileScreen = () => {
         <View style={[styles.infoSection, { borderBottomColor: theme.border }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Информация</Text>
 
-          {['faculty', 'group', 'email', 'phone', 'birthDate'].map((field) => (
-            <TouchableOpacity
-              key={field}
-              style={styles.infoRow}
-              onPress={() => handleEditField(field as keyof UserProfile)}
-            >
-              {getFieldIcon(field)}
-              <View style={styles.infoContent}>
-                <Text style={[styles.infoLabel, { color: theme.secondaryText }]}>
-                  {field === 'faculty' ? 'Факультет' :
-                    field === 'group' ? 'Группа' :
-                      field === 'email' ? 'Email' :
-                        field === 'phone' ? 'Телефон' :
-                          field === 'birthDate' ? 'Дата рождения' : ''}
-                </Text>
-                <Text style={[styles.infoValue, { color: theme.text }]}>
-                  {profile[field as keyof UserProfile]}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {/* Поля для студентов */}
+          {profile.role === 'student' && (
+            <>
+              {['faculty', 'group', 'course', 'email'].filter(field =>
+                field === 'email' || profile[field as keyof UserProfile]
+              ).map((field) => (
+                <TouchableOpacity
+                  key={field}
+                  style={styles.infoRow}
+                  onPress={() => handleEditField(field as keyof UserProfile)}
+                >
+                  {getFieldIcon(field)}
+                  <View style={styles.infoContent}>
+                    <Text style={[styles.infoLabel, { color: theme.secondaryText }]}>
+                      {field === 'faculty' ? 'Факультет' :
+                        field === 'group' ? 'Группа' :
+                          field === 'course' ? 'Курс' :
+                            field === 'email' ? 'Email' : ''}
+                    </Text>
+                    <Text style={[styles.infoValue, { color: theme.text }]}>
+                      {profile[field as keyof UserProfile]}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+
+          {/* Поля для преподавателей */}
+          {profile.role === 'professor' && (
+            <>
+              {['department', 'position', 'email'].filter(field =>
+                field === 'email' || profile[field as keyof UserProfile]
+              ).map((field) => (
+                <TouchableOpacity
+                  key={field}
+                  style={styles.infoRow}
+                  onPress={() => handleEditField(field as keyof UserProfile)}
+                >
+                  {getFieldIcon(field)}
+                  <View style={styles.infoContent}>
+                    <Text style={[styles.infoLabel, { color: theme.secondaryText }]}>
+                      {field === 'department' ? 'Кафедра' :
+                        field === 'position' ? 'Должность' :
+                          field === 'email' ? 'Email' : ''}
+                    </Text>
+                    <Text style={[styles.infoValue, { color: theme.text }]}>
+                      {profile[field as keyof UserProfile]}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+
+          {/* Поля для администраторов (показываем все) */}
+          {profile.role === 'admin' && (
+            <>
+              {['faculty', 'group', 'course', 'department', 'position', 'email'].filter(field =>
+                field === 'email' || profile[field as keyof UserProfile]
+              ).map((field) => (
+                <TouchableOpacity
+                  key={field}
+                  style={styles.infoRow}
+                  onPress={() => handleEditField(field as keyof UserProfile)}
+                >
+                  {getFieldIcon(field)}
+                  <View style={styles.infoContent}>
+                    <Text style={[styles.infoLabel, { color: theme.secondaryText }]}>
+                      {field === 'faculty' ? 'Факультет' :
+                        field === 'group' ? 'Группа' :
+                          field === 'course' ? 'Курс' :
+                            field === 'department' ? 'Кафедра' :
+                              field === 'position' ? 'Должность' :
+                                field === 'email' ? 'Email' : ''}
+                    </Text>
+                    <Text style={[styles.infoValue, { color: theme.text }]}>
+                      {profile[field as keyof UserProfile]}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
         </View>
 
-        <View style={styles.aboutSection}>
-          <View style={styles.aboutHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>О себе</Text>
-            <TouchableOpacity
-              style={styles.editFieldButton}
-              onPress={() => handleEditField('about')}
-            >
-              <MaterialIcons name="edit" size={20} color={theme.primary} />
-            </TouchableOpacity>
-          </View>
-          <Text style={[styles.aboutText, { color: theme.text }]}>{profile.about}</Text>
-        </View>
+
       </ScrollView>
 
       <Modal
@@ -257,10 +295,10 @@ const ProfileScreen = () => {
               <Text style={[styles.modalTitle, { color: theme.text }]}>
                 {editField === 'faculty' ? 'Факультет' :
                   editField === 'group' ? 'Группа' :
-                    editField === 'email' ? 'Email' :
-                      editField === 'phone' ? 'Телефон' :
-                        editField === 'birthDate' ? 'Дата рождения' :
-                          editField === 'about' ? 'О себе' : 'Редактирование'}
+                    editField === 'course' ? 'Курс' :
+                      editField === 'department' ? 'Кафедра' :
+                        editField === 'position' ? 'Должность' :
+                          editField === 'email' ? 'Email' : 'Редактирование'}
               </Text>
               <TouchableOpacity onPress={() => setEditModalVisible(false)}>
                 <AntDesign name="close" size={24} color={theme.text} />
@@ -275,14 +313,11 @@ const ProfileScreen = () => {
               }]}
               value={editValue}
               onChangeText={setEditValue}
-              multiline={editField === 'about'}
-              numberOfLines={editField === 'about' ? 4 : 1}
+              multiline={false}
+              numberOfLines={1}
               autoCapitalize="none"
               placeholderTextColor={theme.placeholderText}
-              keyboardType={
-                editField === 'email' ? 'email-address' :
-                  editField === 'phone' ? 'phone-pad' : 'default'
-              }
+              keyboardType={editField === 'email' ? 'email-address' : 'default'}
             />
 
             <TouchableOpacity
@@ -336,9 +371,10 @@ const styles = StyleSheet.create({
     borderColor: 'white',
   },
   userName: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    textAlign: 'center',
   },
   roleBadge: {
     backgroundColor: '#E6F2FF',
@@ -381,20 +417,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  aboutSection: {
-    padding: 20,
-  },
-  aboutHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  aboutText: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#333',
-  },
+
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

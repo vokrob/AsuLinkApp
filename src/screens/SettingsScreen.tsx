@@ -7,6 +7,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
+import { logout } from '../services/api';
+import { removeData, KEYS } from '../utils/storage';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -26,11 +28,29 @@ const SettingsScreen = () => {
         {
           text: 'Выйти',
           style: 'destructive',
-          onPress: () => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }]
-            });
+          onPress: async () => {
+            try {
+              // Выходим из системы на сервере
+              await logout();
+
+              // Удаляем только токен авторизации, НЕ удаляем профиль
+              await removeData(KEYS.AUTH_TOKEN);
+
+              console.log('✅ Logout successful, profile data preserved');
+
+              // Переходим на экран входа
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }]
+              });
+            } catch (error) {
+              console.error('❌ Logout error:', error);
+              // Даже если произошла ошибка, переходим на экран входа
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }]
+              });
+            }
           }
         }
       ]
