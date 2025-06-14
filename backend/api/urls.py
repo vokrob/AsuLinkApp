@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'api'
@@ -43,4 +43,10 @@ urlpatterns = [
     # User Profile
     path('profile/', views.UserProfileView.as_view(), name='user-profile'),
     path('users/<int:pk>/', views.UserDetailView.as_view(), name='user-detail'),
+
+    # Events
+    path('events/', include('events.urls')),
+
+    # Campus
+    path('campus/', include('campus.urls')),
 ]

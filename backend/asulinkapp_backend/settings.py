@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     # Local apps
     'accounts',
     'posts',
+    'events',
+    'campus',
     'api',
 ]
 
