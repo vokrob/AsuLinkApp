@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './api';
+import { API_BASE_URL, getAuthToken } from './api';
 import { Event, EventDetail, EventReview, CalendarData, CreateEventFromPost } from '../types/Event';
 
 class EventService {
@@ -102,6 +102,7 @@ class EventService {
 
   async joinEvent(id: string): Promise<void> {
     const token = await this.getAuthToken();
+
     const response = await fetch(`${this.baseUrl}/${id}/join/`, {
       method: 'POST',
       headers: {
@@ -111,13 +112,21 @@ class EventService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to join event');
+      let errorMessage = 'Failed to join event';
+      try {
+        const error = await response.json();
+        errorMessage = error.error || error.message || errorMessage;
+      } catch (parseError) {
+        // Если не удается парсить JSON, используем статус ответа
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
   }
 
   async leaveEvent(id: string): Promise<void> {
     const token = await this.getAuthToken();
+
     const response = await fetch(`${this.baseUrl}/${id}/leave/`, {
       method: 'DELETE',
       headers: {
@@ -126,8 +135,15 @@ class EventService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to leave event');
+      let errorMessage = 'Failed to leave event';
+      try {
+        const error = await response.json();
+        errorMessage = error.error || error.message || errorMessage;
+      } catch (parseError) {
+        // Если не удается парсить JSON, используем статус ответа
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
   }
 
@@ -148,8 +164,15 @@ class EventService {
   }
 
   async createEventReview(eventId: string, review: { rating: number; comment?: string }): Promise<EventReview> {
+    console.log(`🔍 Creating review for event ${eventId}:`, review);
+
     const token = await this.getAuthToken();
-    const response = await fetch(`${this.baseUrl}/${eventId}/reviews/`, {
+    console.log(`🔑 Token available: ${token ? 'Yes' : 'No'}`);
+
+    const url = `${this.baseUrl}/${eventId}/reviews/`;
+    console.log(`🔗 Request URL: ${url}`);
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Token ${token}`,
@@ -158,11 +181,25 @@ class EventService {
       body: JSON.stringify(review),
     });
 
+    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+
     if (!response.ok) {
-      throw new Error('Failed to create event review');
+      let errorMessage = 'Failed to create event review';
+      try {
+        const error = await response.json();
+        console.log(`❌ Error response:`, error);
+        errorMessage = error.error || error.message || error.detail || errorMessage;
+      } catch (parseError) {
+        // Если не удается парсить JSON, используем статус ответа
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        console.log(`❌ Parse error, using status: ${errorMessage}`);
+      }
+      throw new Error(errorMessage);
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log(`✅ Review created successfully:`, result);
+    return result;
   }
 
   async createEventFromPost(data: CreateEventFromPost): Promise<EventDetail> {
@@ -200,10 +237,9 @@ class EventService {
   }
 
   private async getAuthToken(): Promise<string> {
-    // Здесь должна быть логика получения токена из AsyncStorage
-    // Пока возвращаем пустую строку, но это нужно будет исправить
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    const token = await AsyncStorage.getItem('authToken');
+    // Используем токен из api.ts
+    const token = getAuthToken();
+    console.log(`🔑 EventService getAuthToken: ${token ? 'Token found' : 'No token'}`);
     if (!token) {
       throw new Error('No auth token found');
     }

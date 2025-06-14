@@ -27,6 +27,13 @@ export interface EventOrganizer {
   role: string;
 }
 
+export interface EventReviewAuthor {
+  id: number;
+  username: string;
+  full_name: string;
+  avatar_url?: string;
+}
+
 export interface EventParticipant {
   user: EventOrganizer;
   status: 'registered' | 'confirmed' | 'attended' | 'cancelled';
@@ -36,7 +43,7 @@ export interface EventParticipant {
 
 export interface EventReview {
   id: string;
-  author: EventOrganizer;
+  author: EventReviewAuthor;
   rating: number;
   comment: string;
   created_at: string;

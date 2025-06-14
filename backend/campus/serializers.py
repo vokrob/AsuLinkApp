@@ -18,12 +18,19 @@ class BuildingListSerializer(serializers.ModelSerializer):
 
 class RoomReviewAuthorSerializer(serializers.ModelSerializer):
     """Сериализатор для автора отзыва"""
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
+    full_name = serializers.SerializerMethodField()
     avatar_url = serializers.CharField(source='profile.avatar_url', read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'full_name', 'avatar_url']
+
+    def get_full_name(self, obj):
+        """Получает полное имя из профиля или fallback к Django User"""
+        if hasattr(obj, 'profile') and obj.profile.full_name:
+            return obj.profile.full_name
+        # Fallback к стандартному методу Django User
+        return obj.get_full_name() or obj.username
 
 
 class RoomReviewSerializer(serializers.ModelSerializer):

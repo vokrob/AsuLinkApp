@@ -2,19 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList, Alert, RefreshControl, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
 import { Building, Room, RoomDetail, CreateRoomReview } from '../types/Campus';
 import { campusService } from '../services/campusService';
+import { sampleBuildings, sampleRoomsCorpusL, sampleRoomsCorpusS, sampleRoomReviews } from '../data/sampleCampus';
+
+// Изображения корпусов
+const BUILDING_IMAGES: { [key: string]: string } = {
+  'Корпус Л': 'https://www.asu.ru/files/images/editor/campus/corpusl10.jpg',
+  'Корпус С': 'https://www.asu.ru/files/images/editor/campus/Campusc11.jpg',
+  'Корпус Д': 'https://www.asu.ru/files/images/editor/campus/corpusd15.jpg',
+  'Корпус М': 'https://www.asu.ru/files/images/editor/40/40-32.jpg',
+  'Корпус К': 'https://www.asu.ru/files/images/editor/campus/corpusk01.jpg',
+};
 
 const MapScreen = () => {
   const { theme, isDarkTheme } = useTheme();
-  const [activeView, setActiveView] = useState<'buildings' | 'rooms' | 'room-detail'>('buildings');
+  const navigation = useNavigation();
+  const [activeView, setActiveView] = useState<'buildings' | 'rooms'>('buildings');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<RoomDetail | null>(null);
-  const [buildings, setBuildings] = useState<Building[]>([]);
+
+  const [buildings, setBuildings] = useState<Building[]>(sampleBuildings);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewData, setReviewData] = useState<CreateRoomReview>({
@@ -23,6 +35,17 @@ const MapScreen = () => {
     category: 'general',
   });
 
+  // Функция для получения изображения корпуса
+  const getBuildingImage = (building: Building): string | undefined => {
+    // Сначала проверяем, есть ли изображение с сервера
+    if (building.image) {
+      return building.image;
+    }
+
+    // Если нет, используем локальные изображения по названию корпуса
+    return BUILDING_IMAGES[building.name];
+  };
+
   useEffect(() => {
     loadBuildings();
   }, []);
@@ -30,11 +53,31 @@ const MapScreen = () => {
   const loadBuildings = async () => {
     try {
       setLoading(true);
-      const buildingsData = await campusService.getBuildings();
-      setBuildings(buildingsData);
+
+      try {
+        const buildingsData = await campusService.getBuildings();
+        console.log('Buildings data received:', buildingsData);
+
+        // Убеждаемся, что buildingsData это массив
+        if (Array.isArray(buildingsData) && buildingsData.length > 0) {
+          setBuildings(buildingsData);
+        } else if (buildingsData && Array.isArray((buildingsData as any).results) && (buildingsData as any).results.length > 0) {
+          // Если API возвращает пагинированный ответ с данными
+          setBuildings((buildingsData as any).results);
+        } else {
+          // Если API возвращает пустой результат, используем примеры данных
+          console.log('API returned empty buildings, using sample data');
+          setBuildings(sampleBuildings);
+        }
+      } catch (apiError) {
+        // Если API недоступен, используем примеры данных
+        console.log('API unavailable, using sample buildings:', apiError);
+        setBuildings(sampleBuildings);
+      }
     } catch (error) {
       console.error('Error loading buildings:', error);
-      Alert.alert('Ошибка', 'Не удалось загрузить корпуса');
+      // В случае любой ошибки используем примеры данных
+      setBuildings(sampleBuildings);
     } finally {
       setLoading(false);
     }
@@ -43,29 +86,57 @@ const MapScreen = () => {
   const loadRooms = async (buildingId: string) => {
     try {
       setLoading(true);
-      const roomsData = await campusService.getRooms({ building: buildingId });
-      setRooms(roomsData);
+
+      try {
+        const roomsData = await campusService.getRooms({ building: buildingId });
+        console.log('Rooms data received:', roomsData);
+
+        // Проверяем, есть ли данные
+        if (Array.isArray(roomsData) && roomsData.length > 0) {
+          setRooms(roomsData);
+        } else if (roomsData && Array.isArray((roomsData as any).results) && (roomsData as any).results.length > 0) {
+          setRooms((roomsData as any).results);
+        } else {
+          // API вернул пустой результат, используем примеры данных
+          console.log('API returned empty rooms, using sample data');
+          if (buildingId === 'building-l') {
+            setRooms(sampleRoomsCorpusL);
+          } else if (buildingId === 'building-s') {
+            setRooms(sampleRoomsCorpusS);
+          } else {
+            setRooms([]);
+            Alert.alert('Информация', 'Для этого корпуса пока нет данных об аудиториях');
+          }
+        }
+      } catch (apiError) {
+        // Если API недоступен, используем примеры данных в зависимости от корпуса
+        console.log('API unavailable, using sample rooms:', apiError);
+        if (buildingId === 'building-l') {
+          setRooms(sampleRoomsCorpusL);
+        } else if (buildingId === 'building-s') {
+          setRooms(sampleRoomsCorpusS);
+        } else {
+          setRooms([]);
+          Alert.alert('Информация', 'Для этого корпуса пока нет данных об аудиториях');
+        }
+      }
     } catch (error) {
       console.error('Error loading rooms:', error);
-      Alert.alert('Ошибка', 'Не удалось загрузить аудитории');
+      // Используем примеры данных в зависимости от корпуса
+      if (buildingId === 'building-l') {
+        setRooms(sampleRoomsCorpusL);
+      } else if (buildingId === 'building-s') {
+        setRooms(sampleRoomsCorpusS);
+      } else {
+        setRooms([]);
+        Alert.alert('Ошибка', 'Не удалось загрузить аудитории');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const loadRoomDetail = async (roomId: string) => {
-    try {
-      setLoading(true);
-      const roomDetail = await campusService.getRoom(roomId);
-      setSelectedRoom(roomDetail);
-      setActiveView('room-detail');
-    } catch (error) {
-      console.error('Error loading room detail:', error);
-      Alert.alert('Ошибка', 'Не удалось загрузить информацию об аудитории');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -84,7 +155,7 @@ const MapScreen = () => {
   };
 
   const handleRoomSelect = (room: Room) => {
-    loadRoomDetail(room.id);
+    navigation.navigate('RoomDetail' as never, { roomId: room.id } as never);
   };
 
   const handleCreateReview = async () => {
@@ -154,39 +225,48 @@ const MapScreen = () => {
           <Text style={[styles.emptyText, { color: theme.secondaryText }]}>Нет доступных корпусов</Text>
         </View>
       ) : (
-        buildings.map(building => (
-          <TouchableOpacity
-            key={building.id}
-            style={[styles.buildingCard, {
-              backgroundColor: theme.card,
-              shadowColor: theme.text
-            }]}
-            onPress={() => handleBuildingSelect(building)}
-          >
-            {building.image && (
-              <Image
-                source={{ uri: building.image }}
-                style={styles.buildingImage}
-              />
-            )}
-            <View style={styles.buildingInfo}>
-              <Text style={[styles.buildingName, { color: theme.text }]}>{building.name}</Text>
-              <View style={styles.addressRow}>
-                <MaterialIcons name="location-on" size={16} color={theme.secondaryText} />
-                <Text style={[styles.buildingAddress, { color: theme.secondaryText }]}>{building.address}</Text>
-              </View>
-              <Text style={[styles.buildingDescription, { color: theme.text }]} numberOfLines={2}>
-                {building.description}
-              </Text>
-              <View style={styles.buildingStats}>
-                {renderRatingStars(building.average_rating)}
-                <Text style={[styles.statsText, { color: theme.secondaryText }]}>
-                  {building.total_rooms} аудиторий
+        buildings.map(building => {
+          const buildingImage = getBuildingImage(building);
+          return (
+            <TouchableOpacity
+              key={building.id}
+              style={[styles.buildingCard, {
+                backgroundColor: theme.card,
+                shadowColor: theme.text
+              }]}
+              onPress={() => handleBuildingSelect(building)}
+            >
+              {buildingImage ? (
+                <Image
+                  source={{ uri: buildingImage }}
+                  style={styles.buildingImage}
+                  resizeMode="cover"
+                  onError={() => console.log(`Failed to load image for ${building.name}`)}
+                />
+              ) : (
+                <View style={[styles.buildingImage, styles.buildingImagePlaceholder, { backgroundColor: theme.border }]}>
+                  <MaterialIcons name="business" size={40} color={theme.secondaryText} />
+                </View>
+              )}
+              <View style={styles.buildingInfo}>
+                <Text style={[styles.buildingName, { color: theme.text }]}>{building.name}</Text>
+                <View style={styles.addressRow}>
+                  <MaterialIcons name="location-on" size={16} color={theme.secondaryText} />
+                  <Text style={[styles.buildingAddress, { color: theme.secondaryText }]}>{building.address}</Text>
+                </View>
+                <Text style={[styles.buildingDescription, { color: theme.text }]} numberOfLines={2}>
+                  {building.description}
                 </Text>
+                <View style={styles.buildingStats}>
+                  {renderRatingStars(building.average_rating)}
+                  <Text style={[styles.statsText, { color: theme.secondaryText }]}>
+                    {building.total_rooms} аудиторий
+                  </Text>
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        ))
+            </TouchableOpacity>
+          );
+        })
       )}
     </ScrollView>
   );
@@ -441,6 +521,12 @@ const styles = StyleSheet.create({
   buildingImage: {
     width: 120,
     height: 120,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  buildingImagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buildingInfo: {
     flex: 1,

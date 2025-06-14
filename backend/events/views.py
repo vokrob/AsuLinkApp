@@ -83,7 +83,22 @@ class EventReviewListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         event_id = self.kwargs['event_id']
         event = get_object_or_404(Event, id=event_id)
-        serializer.save(event=event, author=self.request.user)
+
+        # Проверяем, есть ли уже отзыв от этого пользователя
+        existing_review = EventReview.objects.filter(event=event, author=self.request.user).first()
+
+        if existing_review:
+            # Обновляем существующий отзыв
+            print(f"🔄 Обновляем существующий отзыв пользователя {self.request.user.username}")
+            existing_review.rating = serializer.validated_data['rating']
+            existing_review.comment = serializer.validated_data.get('comment', '')
+            existing_review.save()
+            # Заменяем instance в сериализаторе для корректного ответа
+            serializer.instance = existing_review
+        else:
+            # Создаем новый отзыв
+            print(f"✅ Создаем новый отзыв от пользователя {self.request.user.username}")
+            serializer.save(event=event, author=self.request.user)
 
 
 @api_view(['POST'])

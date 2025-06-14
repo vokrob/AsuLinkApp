@@ -37,6 +37,9 @@ class UserProfile(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student', verbose_name="Роль")
 
     # Общие поля
+    first_name = models.CharField(max_length=150, blank=True, verbose_name="Имя")
+    last_name = models.CharField(max_length=150, blank=True, verbose_name="Фамилия")
+    middle_name = models.CharField(max_length=150, blank=True, verbose_name="Отчество")
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(max_length=500, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -66,12 +69,29 @@ class UserProfile(models.Model):
     def avatar_url(self):
         if self.avatar:
             return self.avatar.url
+        else:
+            # Временно: возвращаем placeholder аватарку для тестирования
+            if self.first_name and self.last_name:
+                initials = f"{self.first_name[0]}{self.last_name[0]}"
+                # Генерируем цвет на основе имени пользователя
+                colors = ['4A90E2', '50C878', 'FF6B6B', 'FFD93D', 'B481FF', 'FF9F40']
+                color_index = hash(self.user.username) % len(colors)
+                color = colors[color_index]
+                return f"https://via.placeholder.com/100x100/{color}/FFFFFF?text={initials}"
         return None
 
     @property
     def full_name(self):
-        """Возвращает полное имя пользователя"""
-        return self.user.get_full_name() or self.user.username
+        """Возвращает полное имя пользователя из профиля"""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        elif self.last_name:
+            return self.last_name
+        else:
+            # Fallback к данным из User модели
+            return self.user.get_full_name() or self.user.username
 
     @classmethod
     def determine_role_by_email(cls, email):

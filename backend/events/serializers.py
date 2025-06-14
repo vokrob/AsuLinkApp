@@ -6,13 +6,30 @@ from accounts.models import UserProfile
 
 class EventOrganizerSerializer(serializers.ModelSerializer):
     """Сериализатор для организатора события"""
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
+    full_name = serializers.CharField(source='profile.full_name', read_only=True)
     avatar_url = serializers.CharField(source='profile.avatar_url', read_only=True)
     role = serializers.CharField(source='profile.role', read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'full_name', 'avatar_url', 'role']
+
+
+class EventReviewAuthorSerializer(serializers.ModelSerializer):
+    """Сериализатор для автора отзыва на событие"""
+    full_name = serializers.SerializerMethodField()
+    avatar_url = serializers.CharField(source='profile.avatar_url', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'full_name', 'avatar_url']
+
+    def get_full_name(self, obj):
+        """Получает полное имя из профиля или fallback к Django User"""
+        if hasattr(obj, 'profile') and obj.profile.full_name:
+            return obj.profile.full_name
+        # Fallback к стандартному методу Django User
+        return obj.get_full_name() or obj.username
 
 
 class EventParticipantSerializer(serializers.ModelSerializer):
@@ -26,7 +43,7 @@ class EventParticipantSerializer(serializers.ModelSerializer):
 
 class EventReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для отзывов на события"""
-    author = EventOrganizerSerializer(read_only=True)
+    author = EventReviewAuthorSerializer(read_only=True)
     author_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:

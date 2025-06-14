@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './api';
+import { API_BASE_URL, getAuthToken } from './api';
 import { Building, Room, RoomDetail, RoomReview, CreateRoomReview, RoomStatistics, BuildingStatistics } from '../types/Campus';
 
 class CampusService {
@@ -180,9 +180,8 @@ class CampusService {
   }
 
   private async getAuthToken(): Promise<string> {
-    // Здесь должна быть логика получения токена из AsyncStorage
-    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    const token = await AsyncStorage.getItem('authToken');
+    // Используем токен из api.ts
+    const token = getAuthToken();
     if (!token) {
       throw new Error('No auth token found');
     }

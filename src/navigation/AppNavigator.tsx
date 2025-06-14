@@ -14,6 +14,8 @@ import SettingsScreen from '../screens/SettingsScreen';
 import CodeVerificationScreen from '../screens/CodeVerificationScreen';
 import EmailConfirmationScreen from '../screens/EmailConfirmationScreen';
 import ProfileSetupScreen from '../screens/ProfileSetupScreen';
+import EventDetailScreen from '../screens/EventDetailScreen';
+import RoomDetailScreen from '../screens/RoomDetailScreen';
 import RightSideMenu from '../components/Menu/RightSideMenu';
 import { useTheme } from '../contexts/ThemeContext';
 import { MenuProvider, useMenu } from '../contexts/MenuContext';
@@ -38,6 +40,12 @@ export type RootStackParamList = {
     email: string;
     username: string;
     token?: string;
+  };
+  EventDetail: {
+    eventId: string;
+  };
+  RoomDetail: {
+    roomId: string;
   };
 };
 
@@ -166,6 +174,8 @@ const AppNavigator = () => {
         <Stack.Screen name="CodeVerification" component={CodeVerificationScreen} />
         <Stack.Screen name="EmailConfirmation" component={EmailConfirmationScreen} />
         <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+        <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+        <Stack.Screen name="RoomDetail" component={RoomDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

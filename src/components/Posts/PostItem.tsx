@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Animated, Dimensions, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Animated, Dimensions, Modal, ActivityIndicator } from 'react-native';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { Swipeable, RectButton } from 'react-native-gesture-handler';
 import { Post } from '../../types/Post';
@@ -13,10 +13,45 @@ interface PostItemProps {
   onDeletePress?: (id: string) => void;
 }
 
+
+
 const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, onDeletePress }) => {
   const { theme } = useTheme();
   const formattedDate = post.createdAt ? formatVkStyle(post.createdAt) : '';
   const [fullScreenImage, setFullScreenImage] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  // Функция для проверки, является ли изображение SVG
+  const isSvgImage = (url: string): boolean => {
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    return lowerUrl.includes('.svg') || lowerUrl.includes('svg');
+  };
+
+  // Функция для проверки, должно ли изображение отображаться
+  const shouldDisplayImage = (imageUrl: string): boolean => {
+    if (!imageUrl || imageUrl.trim() === '') return false;
+    return !isSvgImage(imageUrl);
+  };
+
+  // Отладочная информация
+  console.log('PostItem rendered:', {
+    id: post.id,
+    author: post.author,
+    hasImage: !!post.image,
+    imageUrl: post.image,
+    isSvg: post.image ? isSvgImage(post.image) : false,
+    shouldDisplay: post.image ? shouldDisplayImage(post.image) : false
+  });
+
+  // Сброс состояния при изменении изображения
+  useEffect(() => {
+    if (post.image && shouldDisplayImage(post.image)) {
+      setImageLoading(true);
+      setImageError(false);
+    }
+  }, [post.image]);
 
   const renderRightActions = (
     progress: Animated.AnimatedInterpolation<number>,
@@ -71,7 +106,7 @@ const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, 
           <Text style={[styles.content, { color: theme.text }]}>{post.content}</Text>
         ) : null}
 
-        {post.image ? (
+        {post.image && shouldDisplayImage(post.image) ? (
           <View style={[
             styles.imageContainer,
             !post.content && styles.imageContainerNoContent
@@ -80,11 +115,44 @@ const PostItem: React.FC<PostItemProps> = ({ post, onLikePress, onCommentPress, 
               activeOpacity={0.95}
               onPress={() => setFullScreenImage(true)}
             >
-              <Image
-                source={{ uri: post.image }}
-                style={styles.image}
-                resizeMode="cover"
-              />
+              {/* Индикатор загрузки */}
+              {imageLoading && !imageError && (
+                <View style={styles.imageLoadingContainer}>
+                  <ActivityIndicator size="large" color={theme.primary} />
+                </View>
+              )}
+
+              {/* Отображение ошибки или изображения */}
+              {imageError ? (
+                <View style={styles.imageErrorContainer}>
+                  <Text style={[styles.imageErrorText, { color: theme.secondaryText }]}>
+                    Изображение недоступно
+                  </Text>
+                  <Text style={[styles.imageUrlText, { color: theme.secondaryText }]}>
+                    {post.image}
+                  </Text>
+                </View>
+              ) : (
+                <Image
+                  source={{ uri: post.image }}
+                  style={styles.image}
+                  resizeMode="contain"
+                  onError={(error) => {
+                    console.log('Image loading error:', error.nativeEvent);
+                    setImageError(true);
+                    setImageLoading(false);
+                  }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', post.image);
+                    setImageLoading(false);
+                    setImageError(false);
+                  }}
+                  onLoadStart={() => {
+                    setImageLoading(true);
+                    setImageError(false);
+                  }}
+                />
+              )}
             </TouchableOpacity>
           </View>
         ) : null}
@@ -192,9 +260,39 @@ const styles = StyleSheet.create({
   },
   image: {
     width: width,
-    height: SCREEN_HEIGHT * 0.6,
+    minHeight: 200,
+    maxHeight: 400,
     marginBottom: 0,
   },
+  imageLoadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    zIndex: 1,
+  },
+  imageErrorContainer: {
+    width: width,
+    minHeight: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+  },
+  imageErrorText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  imageUrlText: {
+    fontSize: 10,
+    textAlign: 'center',
+    opacity: 0.7,
+  },
+
   interactions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
