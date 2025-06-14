@@ -4,15 +4,30 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import StatusBarComponent from './src/components/StatusBarComponent';
-import { testConnection } from './src/services/api';
+import { testConnection, setAuthToken } from './src/services/api';
+import { loadData, KEYS } from './src/utils/storage';
 
 export default function App() {
-  // Автоматический тест соединения при запуске приложения
+  // Автоматический тест соединения и загрузка токена при запуске приложения
   useEffect(() => {
-    const initializeConnection = async () => {
+    const initializeApp = async () => {
       console.log('🚀 Инициализация приложения...');
-      console.log('🔍 Автоматический тест соединения с сервером...');
 
+      // Загружаем сохраненный токен
+      try {
+        const savedToken = await loadData(KEYS.AUTH_TOKEN, null);
+        if (savedToken) {
+          console.log('🔑 Загружен сохраненный токен аутентификации');
+          setAuthToken(savedToken);
+        } else {
+          console.log('ℹ️ Сохраненный токен не найден');
+        }
+      } catch (error) {
+        console.error('❌ Ошибка при загрузке токена:', error);
+      }
+
+      // Тестируем соединение с сервером
+      console.log('🔍 Автоматический тест соединения с сервером...');
       try {
         const isConnected = await testConnection();
         if (isConnected) {
@@ -26,7 +41,7 @@ export default function App() {
       }
     };
 
-    initializeConnection();
+    initializeApp();
   }, []);
 
   return (

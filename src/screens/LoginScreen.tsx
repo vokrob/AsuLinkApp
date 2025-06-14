@@ -21,7 +21,7 @@ const LoginScreen = ({ navigation }: any) => {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     // Validation state
-    const [errors, setErrors] = useState<{[key: string]: string}>({});
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isButtonActive, setIsButtonActive] = useState(false);
 
     // Validation effect for login mode
@@ -31,11 +31,11 @@ const LoginScreen = ({ navigation }: any) => {
         } else {
             // Registration validation
             const isValid = email.length > 0 &&
-                           regUsername.length > 0 &&
-                           regPassword.length > 0 &&
-                           confirmPassword.length > 0 &&
-                           regPassword === confirmPassword &&
-                           validateEmail(email);
+                regUsername.length > 0 &&
+                regPassword.length > 0 &&
+                confirmPassword.length > 0 &&
+                regPassword === confirmPassword &&
+                validateEmail(email);
             setIsButtonActive(isValid);
         }
     }, [isLoginMode, username, password, email, regUsername, regPassword, confirmPassword]);
@@ -48,7 +48,7 @@ const LoginScreen = ({ navigation }: any) => {
 
     // Form validation
     const validateForm = () => {
-        const newErrors: {[key: string]: string} = {};
+        const newErrors: { [key: string]: string } = {};
 
         if (!isLoginMode) {
             if (!email) {
@@ -168,7 +168,7 @@ const LoginScreen = ({ navigation }: any) => {
             } else if (error.message.includes('уже существует')) {
                 errorMessage = error.message;
             } else if (error.message.includes('Таймаут при регистрации') ||
-                       error.message.includes('регистрация прошла успешно')) {
+                error.message.includes('регистрация прошла успешно')) {
                 errorMessage = error.message;
                 showCodeOption = true;
             } else if (error.message) {
@@ -202,7 +202,7 @@ const LoginScreen = ({ navigation }: any) => {
     const renderLoginForm = () => (
         <>
             <TextInput
-                placeholder="имя пользователя"
+                placeholder="имя пользователя / email"
                 value={username}
                 onChangeText={setUsername}
                 style={[styles.input, errors.username && styles.inputError]}

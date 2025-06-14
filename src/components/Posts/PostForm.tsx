@@ -13,6 +13,13 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
   const [newsText, setNewsText] = useState('');
   const [pickedImage, setPickedImage] = useState<string | undefined>();
 
+  // Функция для проверки, является ли изображение SVG
+  const isSvgImage = (uri: string): boolean => {
+    if (!uri) return false;
+    const lowerUri = uri.toLowerCase();
+    return lowerUri.includes('.svg') || lowerUri.includes('svg');
+  };
+
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -26,8 +33,17 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
       quality: 0.8,
     });
 
-    if (!result.canceled && result.assets?.length)
-      setPickedImage(result.assets[0].uri);
+    if (!result.canceled && result.assets?.length) {
+      const selectedUri = result.assets[0].uri;
+
+      // Проверяем, не является ли изображение SVG
+      if (isSvgImage(selectedUri)) {
+        Alert.alert('Неподдерживаемый формат', 'SVG изображения не поддерживаются. Пожалуйста, выберите изображение в формате JPG, PNG или другом растровом формате.');
+        return;
+      }
+
+      setPickedImage(selectedUri);
+    }
   };
 
   const handleAddPost = () => {

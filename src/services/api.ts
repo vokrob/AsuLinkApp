@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 
 // Simplified API URL configuration - single working address
 const API_URL = 'http://192.168.1.73:8000/api';
+export const API_BASE_URL = API_URL;
 
 console.log(`🔗 API URL for ${Platform.OS}: ${API_URL}`);
 

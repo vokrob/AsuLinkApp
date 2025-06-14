@@ -12,6 +12,7 @@ import { Post } from '../types/Post';
 import { useTheme } from '../contexts/ThemeContext';
 import { MainTabParamList } from '../navigation/AppNavigator';
 import { saveData, loadData, KEYS } from '../utils/storage';
+import { sampleNewsData } from '../data/sampleNews';
 
 const defaultAvatarImage = require('../../assets/Avatar.jpg');
 
@@ -41,9 +42,20 @@ const FeedScreen = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const savedPosts = await loadData<Post[]>(KEYS.POSTS, []);
-            const sortedPosts = sortPostsByDate(savedPosts);
-            setPosts(sortedPosts);
+            console.log('📦 Loading news with images from ASU website...');
+            const storedPosts = await loadData<Post[]>(KEYS.POSTS, []);
+
+            if (storedPosts && storedPosts.length > 0) {
+                console.log('Loading saved posts...');
+                const sortedPosts = sortPostsByDate(storedPosts);
+                setPosts(sortedPosts);
+            } else {
+                const postsWithSampleNews = [...sampleNewsData];
+                await saveData(KEYS.POSTS, postsWithSampleNews);
+                const sortedPosts = sortPostsByDate(postsWithSampleNews);
+                setPosts(sortedPosts);
+            }
+
             await loadUserAvatar();
         };
 
@@ -71,20 +83,19 @@ const FeedScreen = () => {
     };
 
     const updatePostsWithCurrentAvatar = (avatar: any) => {
-        loadData<Post[]>(KEYS.POSTS, []).then(storedPosts => {
-            if (storedPosts && storedPosts.length > 0) {
-                const updatedPosts = storedPosts.map(post => {
-                    if (post.author === 'Данил Борков') {
-                        return { ...post, avatar };
-                    }
-                    return { ...post, avatar: post.avatar || defaultAvatarImage };
-                });
+        // Используем текущие посты из состояния, а не загружаем из кэша
+        if (posts && posts.length > 0) {
+            const updatedPosts = posts.map(post => {
+                if (post.author === 'Данил Борков') {
+                    return { ...post, avatar };
+                }
+                return { ...post, avatar: post.avatar || defaultAvatarImage };
+            });
 
-                const sortedUpdatedPosts = sortPostsByDate(updatedPosts);
-                setPosts(sortedUpdatedPosts);
-                saveData(KEYS.POSTS, sortedUpdatedPosts);
-            }
-        });
+            const sortedUpdatedPosts = sortPostsByDate(updatedPosts);
+            setPosts(sortedUpdatedPosts);
+            saveData(KEYS.POSTS, sortedUpdatedPosts);
+        }
     };
 
     useEffect(() => {

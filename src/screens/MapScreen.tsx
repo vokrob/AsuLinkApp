@@ -1,206 +1,189 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, Image, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, FlatList, Alert, RefreshControl, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import HeaderBar from '../components/Navigation/HeaderBar';
 import { useTheme } from '../contexts/ThemeContext';
+import { Building, Room, RoomDetail, CreateRoomReview } from '../types/Campus';
+import { campusService } from '../services/campusService';
+import { sampleBuildings, sampleRoomsCorpusL, sampleRoomsCorpusS, sampleRoomReviews } from '../data/sampleCampus';
 
-interface Building {
-  id: string;
-  name: string;
-  address: string;
-  image: string;
-  floors: number;
-  description: string;
-  rating: number;
-}
-
-interface Room {
-  id: string;
-  number: string;
-  buildingId: string;
-  floor: number;
-  type: 'classroom' | 'laboratory' | 'lecture' | 'admin';
-  capacity: number;
-  equipment: string[];
-  rating: number;
-}
+// Изображения корпусов
+const BUILDING_IMAGES: { [key: string]: string } = {
+  'Корпус Л': 'https://www.asu.ru/files/images/editor/campus/corpusl10.jpg',
+  'Корпус С': 'https://www.asu.ru/files/images/editor/campus/Campusc11.jpg',
+  'Корпус Д': 'https://www.asu.ru/files/images/editor/campus/corpusd15.jpg',
+  'Корпус М': 'https://www.asu.ru/files/images/editor/40/40-32.jpg',
+  'Корпус К': 'https://www.asu.ru/files/images/editor/campus/corpusk01.jpg',
+};
 
 const MapScreen = () => {
   const { theme, isDarkTheme } = useTheme();
+  const navigation = useNavigation();
   const [activeView, setActiveView] = useState<'buildings' | 'rooms'>('buildings');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
 
-  const buildings: Building[] = [
-    {
-      id: '1',
-      name: 'Корпус Л',
-      address: 'пр. Ленина, 61',
-      image: 'https://www.asu.ru/files/images/editor/campus/corpusl10.jpg',
-      floors: 4,
-      description: 'Учебный корпус, в котором располагаются Институт биологии и биотехнологии, Институт математики и информационных технологий. Оснащен современными лабораториями и компьютерными классами для практических занятий студентов.',
-      rating: 4.7
-    },
-    {
-      id: '2',
-      name: 'Корпус С',
-      address: 'пр-т Социалистический, 68',
-      image: 'https://www.asu.ru/files/images/editor/campus/Campusc11.jpg',
-      floors: 3,
-      description: 'Здесь находятся МИЭМИС (Международный институт экономики, менеджмента и информационных систем) и Юридический институт. Корпус оборудован учебными аудиториями и специализированными кабинетами для подготовки экономистов и юристов.',
-      rating: 4.3
-    },
-    {
-      id: '3',
-      name: 'Корпус Д',
-      address: 'ул. Димитрова, 66',
-      image: 'https://www.asu.ru/files/images/editor/campus/corpusd15.jpg',
-      floors: 5,
-      description: 'В этом корпусе размещается Институт гуманитарных наук. Здесь проходят занятия студентов филологических, лингвистических и других гуманитарных направлений, расположена библиотека и лингафонные кабинеты.',
-      rating: 4.0
-    },
-    {
-      id: '4',
-      name: 'Корпус М',
-      address: 'пр-т Ленина, 61',
-      image: 'https://www.asu.ru/files/images/editor/40/40-32.jpg',
-      floors: 2,
-      description: 'Корпус, в котором располагаются Институт географии и Институт истории и международных отношений. Оснащен картографическими лабораториями, историческими кабинетами и специализированными аудиториями.',
-      rating: 3.8
-    },
-    {
-      id: '5',
-      name: 'Корпус К',
-      address: 'пр-т Красноармейский, 90',
-      image: 'https://www.asu.ru/files/images/editor/campus/corpusk01.jpg',
-      floors: 4,
-      description: 'Здесь находятся Институт цифровых технологий, электроники и физики, а также Институт химии и химико-фармацевтических технологий. Корпус оборудован современными лабораториями, исследовательскими центрами и экспериментальными площадками.',
-      rating: 4.2
-    }
-  ];
+  const [buildings, setBuildings] = useState<Building[]>(sampleBuildings);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewData, setReviewData] = useState<CreateRoomReview>({
+    rating: 5,
+    comment: '',
+    category: 'general',
+  });
 
-  const rooms: Room[] = [
-    {
-      id: '101',
-      number: '301',
-      buildingId: '2',
-      floor: 3,
-      type: 'classroom',
-      capacity: 30,
-      equipment: ['Проектор', 'Компьютеры', 'Интерактивная доска'],
-      rating: 4.8
-    },
-    {
-      id: '102',
-      number: '207',
-      buildingId: '2',
-      floor: 2,
-      type: 'laboratory',
-      capacity: 20,
-      equipment: ['Компьютеры', 'Специальное оборудование'],
-      rating: 4.5
-    },
-    {
-      id: '103',
-      number: '101',
-      buildingId: '2',
-      floor: 1,
-      type: 'lecture',
-      capacity: 100,
-      equipment: ['Проектор', 'Аудиосистема'],
-      rating: 4.2
-    },
-    {
-      id: '104',
-      number: '402',
-      buildingId: '5',
-      floor: 4,
-      type: 'laboratory',
-      capacity: 25,
-      equipment: ['Компьютеры', 'VR-оборудование', '3D-принтеры'],
-      rating: 4.9
-    },
-    {
-      id: '105',
-      number: '204',
-      buildingId: '5',
-      floor: 2,
-      type: 'classroom',
-      capacity: 40,
-      equipment: ['Проектор', 'Интерактивная доска', 'Аудиосистема'],
-      rating: 4.6
-    },
-    {
-      id: '106',
-      number: '214',
-      buildingId: '1',
-      floor: 2,
-      type: 'lecture',
-      capacity: 150,
-      equipment: ['Проектор', 'Микрофон', 'Система видеоконференций'],
-      rating: 4.7
-    },
-    {
-      id: '107',
-      number: '321',
-      buildingId: '1',
-      floor: 3,
-      type: 'admin',
-      capacity: 10,
-      equipment: ['Компьютеры', 'Принтер', 'Сканер'],
-      rating: 4.5
-    },
-    {
-      id: '108',
-      number: '401',
-      buildingId: '3',
-      floor: 4,
-      type: 'classroom',
-      capacity: 35,
-      equipment: ['Юридическая библиотека', 'Компьютер', 'Проектор'],
-      rating: 4.2
-    },
-    {
-      id: '109',
-      number: '203',
-      buildingId: '3',
-      floor: 2,
-      type: 'lecture',
-      capacity: 80,
-      equipment: ['Имитация зала суда', 'Аудиосистема', 'Проектор'],
-      rating: 4.6
-    },
-    {
-      id: '110',
-      number: '102',
-      buildingId: '4',
-      floor: 1,
-      type: 'laboratory',
-      capacity: 25,
-      equipment: ['Лабораторное оборудование', 'Компьютеры', 'Интерактивная доска'],
-      rating: 4.0
-    },
-    {
-      id: '111',
-      number: '210',
-      buildingId: '4',
-      floor: 2,
-      type: 'classroom',
-      capacity: 30,
-      equipment: ['Математические модели', 'Проектор'],
-      rating: 3.8
+  // Функция для получения изображения корпуса
+  const getBuildingImage = (building: Building): string | undefined => {
+    // Сначала проверяем, есть ли изображение с сервера
+    if (building.image) {
+      return building.image;
     }
-  ];
+
+    // Если нет, используем локальные изображения по названию корпуса
+    return BUILDING_IMAGES[building.name];
+  };
+
+  useEffect(() => {
+    loadBuildings();
+  }, []);
+
+  const loadBuildings = async () => {
+    try {
+      setLoading(true);
+
+      try {
+        const buildingsData = await campusService.getBuildings();
+        console.log('Buildings data received:', buildingsData);
+
+        // Убеждаемся, что buildingsData это массив
+        if (Array.isArray(buildingsData) && buildingsData.length > 0) {
+          setBuildings(buildingsData);
+        } else if (buildingsData && Array.isArray((buildingsData as any).results) && (buildingsData as any).results.length > 0) {
+          // Если API возвращает пагинированный ответ с данными
+          setBuildings((buildingsData as any).results);
+        } else {
+          // Если API возвращает пустой результат, используем примеры данных
+          console.log('API returned empty buildings, using sample data');
+          setBuildings(sampleBuildings);
+        }
+      } catch (apiError) {
+        // Если API недоступен, используем примеры данных
+        console.log('API unavailable, using sample buildings:', apiError);
+        setBuildings(sampleBuildings);
+      }
+    } catch (error) {
+      console.error('Error loading buildings:', error);
+      // В случае любой ошибки используем примеры данных
+      setBuildings(sampleBuildings);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadRooms = async (buildingId: string) => {
+    try {
+      setLoading(true);
+
+      try {
+        const roomsData = await campusService.getRooms({ building: buildingId });
+        console.log('Rooms data received:', roomsData);
+
+        // Проверяем, есть ли данные
+        if (Array.isArray(roomsData) && roomsData.length > 0) {
+          setRooms(roomsData);
+        } else if (roomsData && Array.isArray((roomsData as any).results) && (roomsData as any).results.length > 0) {
+          setRooms((roomsData as any).results);
+        } else {
+          // API вернул пустой результат, используем примеры данных
+          console.log('API returned empty rooms, using sample data');
+          if (buildingId === 'building-l') {
+            setRooms(sampleRoomsCorpusL);
+          } else if (buildingId === 'building-s') {
+            setRooms(sampleRoomsCorpusS);
+          } else {
+            setRooms([]);
+            Alert.alert('Информация', 'Для этого корпуса пока нет данных об аудиториях');
+          }
+        }
+      } catch (apiError) {
+        // Если API недоступен, используем примеры данных в зависимости от корпуса
+        console.log('API unavailable, using sample rooms:', apiError);
+        if (buildingId === 'building-l') {
+          setRooms(sampleRoomsCorpusL);
+        } else if (buildingId === 'building-s') {
+          setRooms(sampleRoomsCorpusS);
+        } else {
+          setRooms([]);
+          Alert.alert('Информация', 'Для этого корпуса пока нет данных об аудиториях');
+        }
+      }
+    } catch (error) {
+      console.error('Error loading rooms:', error);
+      // Используем примеры данных в зависимости от корпуса
+      if (buildingId === 'building-l') {
+        setRooms(sampleRoomsCorpusL);
+      } else if (buildingId === 'building-s') {
+        setRooms(sampleRoomsCorpusS);
+      } else {
+        setRooms([]);
+        Alert.alert('Ошибка', 'Не удалось загрузить аудитории');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    if (activeView === 'buildings') {
+      await loadBuildings();
+    } else if (activeView === 'rooms' && selectedBuilding) {
+      await loadRooms(selectedBuilding.id);
+    }
+    setRefreshing(false);
+  };
 
   const handleBuildingSelect = (building: Building) => {
     setSelectedBuilding(building);
     setActiveView('rooms');
+    loadRooms(building.id);
   };
 
-  const filteredRooms = rooms.filter(room => {
-    if (!selectedBuilding) return false;
-    return room.buildingId === selectedBuilding.id;
-  });
+  const handleRoomSelect = (room: Room) => {
+    navigation.navigate('RoomDetail' as never, { roomId: room.id } as never);
+  };
+
+  const handleCreateReview = async () => {
+    if (!selectedRoom) return;
+
+    try {
+      await campusService.createRoomReview(selectedRoom.id, reviewData);
+      Alert.alert('Успех', 'Отзыв добавлен');
+      setShowReviewModal(false);
+      setReviewData({ rating: 5, comment: '', category: 'general' });
+      // Перезагружаем детали аудитории
+      loadRoomDetail(selectedRoom.id);
+    } catch (error: any) {
+      Alert.alert('Ошибка', error.message || 'Не удалось добавить отзыв');
+    }
+  };
+
+  const getRoomTypeColor = (type: string) => {
+    switch (type) {
+      case 'classroom': return { bg: isDarkTheme ? '#1A3A5A' : '#E6F2FF', text: isDarkTheme ? '#81B4FF' : '#0066CC' };
+      case 'laboratory': return { bg: isDarkTheme ? '#3A1A5A' : '#F2E6FF', text: isDarkTheme ? '#C281FF' : '#6600CC' };
+      case 'lecture': return { bg: isDarkTheme ? '#1A5A3A' : '#E6FFF2', text: isDarkTheme ? '#81FFC2' : '#00CC66' };
+      case 'admin': return { bg: isDarkTheme ? '#5A3A1A' : '#FFF2E6', text: isDarkTheme ? '#FFC281' : '#CC6600' };
+      case 'computer': return { bg: isDarkTheme ? '#2A2A5A' : '#F0F0FF', text: isDarkTheme ? '#9999FF' : '#4444CC' };
+      case 'library': return { bg: isDarkTheme ? '#4A2A2A' : '#FFF0F0', text: isDarkTheme ? '#FF9999' : '#CC4444' };
+      default: return { bg: '#f0f0f0', text: '#333333' };
+    }
+  };
 
   const renderRatingStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -221,47 +204,74 @@ const MapScreen = () => {
   };
 
   const renderBuildingsList = () => (
-    <ScrollView style={[styles.contentContainer, { backgroundColor: theme.background }]}>
-      {buildings.map(building => (
-        <TouchableOpacity
-          key={building.id}
-          style={[styles.buildingCard, {
-            backgroundColor: theme.card,
-            shadowColor: theme.text
-          }]}
-          onPress={() => handleBuildingSelect(building)}
-        >
-          <Image
-            source={{ uri: building.image }}
-            style={styles.buildingImage}
-          />
-          <View style={styles.buildingInfo}>
-            <Text style={[styles.buildingName, { color: theme.text }]}>{building.name}</Text>
-            <View style={styles.addressRow}>
-              <MaterialIcons name="location-on" size={16} color={theme.secondaryText} />
-              <Text style={[styles.buildingAddress, { color: theme.secondaryText }]}>{building.address}</Text>
-            </View>
-            <Text style={[styles.buildingDescription, { color: theme.text }]} numberOfLines={2}>
-              {building.description}
-            </Text>
-            {renderRatingStars(building.rating)}
-          </View>
-        </TouchableOpacity>
-      ))}
+    <ScrollView
+      style={[styles.contentContainer, { backgroundColor: theme.background }]}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={[theme.primary]}
+          tintColor={theme.primary}
+        />
+      }
+    >
+      {loading && buildings.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: theme.secondaryText }]}>Загрузка корпусов...</Text>
+        </View>
+      ) : buildings.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <MaterialIcons name="business" size={64} color={theme.secondaryText} />
+          <Text style={[styles.emptyText, { color: theme.secondaryText }]}>Нет доступных корпусов</Text>
+        </View>
+      ) : (
+        buildings.map(building => {
+          const buildingImage = getBuildingImage(building);
+          return (
+            <TouchableOpacity
+              key={building.id}
+              style={[styles.buildingCard, {
+                backgroundColor: theme.card,
+                shadowColor: theme.text
+              }]}
+              onPress={() => handleBuildingSelect(building)}
+            >
+              {buildingImage ? (
+                <Image
+                  source={{ uri: buildingImage }}
+                  style={styles.buildingImage}
+                  resizeMode="cover"
+                  onError={() => console.log(`Failed to load image for ${building.name}`)}
+                />
+              ) : (
+                <View style={[styles.buildingImage, styles.buildingImagePlaceholder, { backgroundColor: theme.border }]}>
+                  <MaterialIcons name="business" size={40} color={theme.secondaryText} />
+                </View>
+              )}
+              <View style={styles.buildingInfo}>
+                <Text style={[styles.buildingName, { color: theme.text }]}>{building.name}</Text>
+                <View style={styles.addressRow}>
+                  <MaterialIcons name="location-on" size={16} color={theme.secondaryText} />
+                  <Text style={[styles.buildingAddress, { color: theme.secondaryText }]}>{building.address}</Text>
+                </View>
+                <Text style={[styles.buildingDescription, { color: theme.text }]} numberOfLines={2}>
+                  {building.description}
+                </Text>
+                <View style={styles.buildingStats}>
+                  {renderRatingStars(building.average_rating)}
+                  <Text style={[styles.statsText, { color: theme.secondaryText }]}>
+                    {building.total_rooms} аудиторий
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })
+      )}
     </ScrollView>
   );
 
   const renderRoomsList = () => {
-    const getRoomTypeColor = (type: string) => {
-      switch (type) {
-        case 'classroom': return { bg: isDarkTheme ? '#1A3A5A' : '#E6F2FF', text: isDarkTheme ? '#81B4FF' : '#0066CC' };
-        case 'laboratory': return { bg: isDarkTheme ? '#3A1A5A' : '#F2E6FF', text: isDarkTheme ? '#C281FF' : '#6600CC' };
-        case 'lecture': return { bg: isDarkTheme ? '#1A5A3A' : '#E6FFF2', text: isDarkTheme ? '#81FFC2' : '#00CC66' };
-        case 'admin': return { bg: isDarkTheme ? '#5A3A1A' : '#FFF2E6', text: isDarkTheme ? '#FFC281' : '#CC6600' };
-        default: return { bg: '#f0f0f0', text: '#333333' };
-      }
-    };
-
     return (
       <View style={[styles.roomsContainer, { backgroundColor: theme.background }]}>
         <TouchableOpacity
@@ -284,17 +294,28 @@ const MapScreen = () => {
         )}
 
         <FlatList
-          data={filteredRooms}
+          data={rooms}
           keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[theme.primary]}
+              tintColor={theme.primary}
+            />
+          }
           renderItem={({ item }) => {
-            const typeColors = getRoomTypeColor(item.type);
+            const typeColors = getRoomTypeColor(item.room_type);
             return (
-              <View style={[styles.roomCard, {
-                backgroundColor: theme.card,
-                shadowColor: theme.text
-              }]}>
+              <TouchableOpacity
+                style={[styles.roomCard, {
+                  backgroundColor: theme.card,
+                  shadowColor: theme.text
+                }]}
+                onPress={() => handleRoomSelect(item)}
+              >
                 <View style={styles.roomHeader}>
-                  <View>
+                  <View style={styles.roomInfo}>
                     <Text style={[styles.roomNumber, { color: theme.text }]}>
                       Аудитория {item.number}
                     </Text>
@@ -304,9 +325,7 @@ const MapScreen = () => {
                   </View>
                   <View style={[styles.roomTypeBadge, { backgroundColor: typeColors.bg }]}>
                     <Text style={[styles.roomTypeText, { color: typeColors.text }]}>
-                      {item.type === 'classroom' ? 'Аудитория' :
-                        item.type === 'laboratory' ? 'Лаборатория' :
-                          item.type === 'lecture' ? 'Лекционная' : 'Административная'}
+                      {item.room_type_display}
                     </Text>
                   </View>
                 </View>
@@ -318,32 +337,141 @@ const MapScreen = () => {
                       Вместимость: {item.capacity} чел.
                     </Text>
                   </View>
+                  <View style={styles.roomDetail}>
+                    <AntDesign name="star" size={16} color="#FFD700" />
+                    <Text style={[styles.roomDetailText, { color: theme.secondaryText }]}>
+                      {item.average_rating > 0 ? item.average_rating.toFixed(1) : 'Нет оценок'}
+                    </Text>
+                  </View>
+                  <View style={styles.roomDetail}>
+                    <AntDesign name="message1" size={16} color={theme.secondaryText} />
+                    <Text style={[styles.roomDetailText, { color: theme.secondaryText }]}>
+                      {item.reviews_count} отзывов
+                    </Text>
+                  </View>
+                </View>
 
+                {item.equipment.length > 0 && (
                   <View style={styles.equipmentContainer}>
                     <Text style={[styles.equipmentTitle, { color: theme.text }]}>Оборудование:</Text>
                     <View style={styles.equipmentList}>
-                      {item.equipment.map((eq, index) => (
+                      {item.equipment.slice(0, 3).map((eq, index) => (
                         <View key={index} style={[styles.equipmentItem, { backgroundColor: theme.primary + '20' }]}>
                           <Text style={[styles.equipmentText, { color: theme.text }]}>{eq}</Text>
                         </View>
                       ))}
+                      {item.equipment.length > 3 && (
+                        <Text style={[styles.moreEquipment, { color: theme.secondaryText }]}>
+                          +{item.equipment.length - 3} еще
+                        </Text>
+                      )}
                     </View>
                   </View>
-                </View>
+                )}
 
-                {renderRatingStars(item.rating)}
-              </View>
+                <View style={styles.roomActions}>
+                  <TouchableOpacity
+                    style={[styles.reviewButton, { backgroundColor: theme.primary }]}
+                    onPress={() => {
+                      setSelectedRoom({ ...item } as RoomDetail);
+                      setShowReviewModal(true);
+                    }}
+                  >
+                    <AntDesign name="plus" size={16} color="white" />
+                    <Text style={styles.reviewButtonText}>Оставить отзыв</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
             );
           }}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="meeting-room" size={64} color={theme.secondaryText} />
+              <Text style={[styles.emptyText, { color: theme.secondaryText }]}>
+                {loading ? 'Загрузка аудиторий...' : 'Нет доступных аудиторий'}
+              </Text>
+            </View>
+          }
         />
       </View>
     );
   };
 
+  const renderReviewModal = () => (
+    <Modal
+      visible={showReviewModal}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setShowReviewModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Оставить отзыв</Text>
+            <TouchableOpacity onPress={() => setShowReviewModal(false)}>
+              <AntDesign name="close" size={24} color={theme.text} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.ratingSection}>
+            <Text style={[styles.ratingLabel, { color: theme.text }]}>Общая оценка:</Text>
+            <View style={styles.ratingStars}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity
+                  key={star}
+                  onPress={() => setReviewData({ ...reviewData, rating: star })}
+                >
+                  <AntDesign
+                    name={star <= reviewData.rating ? "star" : "staro"}
+                    size={32}
+                    color={star <= reviewData.rating ? "#FFD700" : "#DDD"}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.commentSection}>
+            <Text style={[styles.commentLabel, { color: theme.text }]}>Комментарий:</Text>
+            <TextInput
+              style={[styles.commentInput, {
+                backgroundColor: theme.background,
+                color: theme.text,
+                borderColor: theme.border
+              }]}
+              multiline
+              numberOfLines={4}
+              placeholder="Поделитесь своим мнением об аудитории..."
+              placeholderTextColor={theme.secondaryText}
+              value={reviewData.comment}
+              onChangeText={(text) => setReviewData({ ...reviewData, comment: text })}
+            />
+          </View>
+
+          <View style={styles.modalActions}>
+            <TouchableOpacity
+              style={[styles.cancelButton, { borderColor: theme.border }]}
+              onPress={() => setShowReviewModal(false)}
+            >
+              <Text style={[styles.cancelButtonText, { color: theme.secondaryText }]}>Отмена</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.submitButton, { backgroundColor: theme.primary }]}
+              onPress={handleCreateReview}
+            >
+              <Text style={styles.submitButtonText}>Отправить</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar title="Карта кампуса" onMenuPress={() => { }} />
       {activeView === 'buildings' ? renderBuildingsList() : renderRoomsList()}
+      {renderReviewModal()}
     </SafeAreaView>
   );
 };
@@ -357,10 +485,31 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 16,
+    textAlign: 'center',
+  },
   buildingCard: {
     flexDirection: 'row',
     backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 15,
     overflow: 'hidden',
     elevation: 2,
@@ -372,20 +521,26 @@ const styles = StyleSheet.create({
   buildingImage: {
     width: 120,
     height: 120,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  buildingImagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buildingInfo: {
     flex: 1,
-    padding: 10,
+    padding: 12,
   },
   buildingName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 6,
   },
   addressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 6,
   },
   buildingAddress: {
     fontSize: 14,
@@ -395,16 +550,26 @@ const styles = StyleSheet.create({
   buildingDescription: {
     fontSize: 14,
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 8,
+  },
+  buildingStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   ratingContainer: {
     flexDirection: 'row',
-    marginTop: 5,
+  },
+  statsText: {
+    fontSize: 12,
+    color: '#666',
   },
   roomsContainer: {
     flex: 1,
   },
   backToBuildings: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -429,8 +594,9 @@ const styles = StyleSheet.create({
   },
   roomCard: {
     backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 15,
     marginBottom: 15,
     elevation: 2,
     shadowColor: '#000',
@@ -441,64 +607,170 @@ const styles = StyleSheet.create({
   roomHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  roomInfo: {
+    flex: 1,
   },
   roomNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginRight: 10,
+    marginBottom: 4,
   },
   floorInfo: {
     fontSize: 14,
     color: '#666',
   },
   roomTypeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
   },
   roomTypeText: {
     fontSize: 12,
-    color: '#0066CC',
+    fontWeight: '600',
   },
   roomDetails: {
     flexDirection: 'row',
-    marginBottom: 10,
+    flexWrap: 'wrap',
+    marginBottom: 12,
   },
   roomDetail: {
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 15,
+    marginBottom: 5,
   },
   roomDetailText: {
     marginLeft: 5,
     color: '#666',
+    fontSize: 14,
   },
   equipmentContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 10,
+    marginBottom: 12,
   },
   equipmentTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 6,
   },
   equipmentList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
   },
   equipmentItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 10,
-    marginBottom: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 6,
+    marginBottom: 4,
   },
   equipmentText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  moreEquipment: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginLeft: 4,
+  },
+  roomActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  reviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  reviewButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
     marginLeft: 5,
-    fontSize: 13,
-    color: '#333',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    maxWidth: 400,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  ratingSection: {
+    marginBottom: 20,
+  },
+  ratingLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  ratingStars: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  commentSection: {
+    marginBottom: 20,
+  },
+  commentLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  commentInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    textAlignVertical: 'top',
+    fontSize: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  submitButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
