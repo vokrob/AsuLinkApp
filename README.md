@@ -1,16 +1,16 @@
 # AsuLinkApp
 
-Мобильное приложение социальной сети для студентов и преподавателей Алтайского государственного университета.
+Mobile social network application for students and faculty of Altai State University.
 
-## Технологии
+## Technologies
 
-- **React Native 0.79.3** с TypeScript и Expo SDK 53
-- **Django 5.1.4** с SQLite и Django REST Framework
-- **Django Allauth** для аутентификации с email верификацией
+- **React Native 0.79.3** with TypeScript and Expo SDK 53
+- **Django 5.1.4** with SQLite and Django REST Framework
+- **Django Allauth** for authentication with email verification
 
-## Установка
+## Installation
 
-### Бэкенд
+### Backend
 ```bash
 cd backend
 python -m venv venv
@@ -20,53 +20,53 @@ python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
-### Фронтенд
+### Frontend
 ```bash
 npm install
 npm start
 ```
 
-**Настройка:** Обновите IP адрес в `src/services/api.ts` для работы на физических устройствах.
+**Configuration:** Update IP address in `src/services/api.ts` for physical device testing.
 
-## Функциональность
+## Features
 
-- **Аутентификация** - регистрация с email верификацией, автоматическое назначение ролей
-- **Лента новостей** - посты с изображениями, лайки, комментарии
-- **События** - календарь мероприятий с участием и отзывами
-- **Карта кампуса** - корпуса и аудитории с системой рейтингов
-- **Сообщения** - чаты между пользователями
-- **Профили** - разные формы для студентов и преподавателей
+- **Authentication** - registration with email verification, automatic role assignment
+- **News Feed** - posts with images, likes, comments
+- **Events** - event calendar with participation and reviews
+- **Campus Map** - buildings and rooms with rating system
+- **Messages** - chat between users
+- **Profiles** - different forms for students and faculty
 
-## Основные API эндпоинты
+## Main API Endpoints
 
-- **Аутентификация**: `/api/auth/` - регистрация, вход, верификация
-- **Посты**: `/api/posts/` - создание, лайки, комментарии
-- **События**: `/api/events/` - календарь, участие, отзывы
-- **Кампус**: `/api/campus/` - корпуса, аудитории, рейтинги
-- **Профили**: `/api/profile/` - управление профилем пользователя
+- **Authentication**: `/api/auth/` - registration, login, verification
+- **Posts**: `/api/posts/` - creation, likes, comments
+- **Events**: `/api/events/` - calendar, participation, reviews
+- **Campus**: `/api/campus/` - buildings, rooms, ratings
+- **Profiles**: `/api/profile/` - user profile management
 
-## Система ролей
+## Role System
 
-- **Студент** - назначается по умолчанию
-- **Преподаватель** - назначается автоматически по email адресу
+- **Student** - assigned by default
+- **Faculty** - assigned automatically by email address
 
 ```bash
-# Добавить email преподавателя
-python manage.py add_teacher_email teacher@asu.edu.ru --department "Кафедра ИТ" --position "Доцент"
+# Add faculty email
+python manage.py add_teacher_email teacher@asu.edu.ru --department "IT Department" --position "Associate Professor"
 ```
 
-## Тестирование
+## Testing
 
 ```bash
-# Бэкенд
+# Backend
 cd backend
 python manage.py test
 
-# Фронтенд
+# Frontend
 npm test
 ```
 
-## Создание тестовых данных
+## Creating Test Data
 
 ```bash
 python manage.py create_test_campus_data
