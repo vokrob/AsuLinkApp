@@ -72,7 +72,3 @@ npm test
 python manage.py create_test_campus_data
 python manage.py create_test_events_data
 ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
