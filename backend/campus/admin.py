@@ -9,18 +9,18 @@ class BuildingAdmin(admin.ModelAdmin):
     readonly_fields = ['id', 'created_at', 'updated_at', 'total_rooms', 'average_rating']
 
     fieldsets = (
-        ('Основная информация', {
+        ('Basic Information', {
             'fields': ('name', 'address', 'description', 'image', 'floors')
         }),
-        ('Координаты', {
+        ('Coordinates', {
             'fields': ('latitude', 'longitude'),
             'classes': ('collapse',)
         }),
-        ('Статистика', {
+        ('Statistics', {
             'fields': ('total_rooms', 'average_rating'),
             'classes': ('collapse',)
         }),
-        ('Системная информация', {
+        ('System Information', {
             'fields': ('id', 'created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -35,17 +35,17 @@ class RoomAdmin(admin.ModelAdmin):
     readonly_fields = ['id', 'created_at', 'updated_at', 'average_rating', 'reviews_count']
 
     fieldsets = (
-        ('Основная информация', {
+        ('Basic Information', {
             'fields': ('building', 'number', 'floor', 'room_type', 'capacity')
         }),
-        ('Описание и оборудование', {
+        ('Description and Equipment', {
             'fields': ('description', 'equipment', 'is_accessible')
         }),
-        ('Статистика', {
+        ('Statistics', {
             'fields': ('average_rating', 'reviews_count'),
             'classes': ('collapse',)
         }),
-        ('Системная информация', {
+        ('System Information', {
             'fields': ('id', 'created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
@@ -60,14 +60,14 @@ class RoomReviewAdmin(admin.ModelAdmin):
     readonly_fields = ['id', 'created_at', 'updated_at']
 
     fieldsets = (
-        ('Основная информация', {
+        ('Basic Information', {
             'fields': ('room', 'author', 'rating', 'category', 'comment')
         }),
-        ('Детальные оценки', {
+        ('Detailed Ratings', {
             'fields': ('cleanliness_rating', 'equipment_rating', 'comfort_rating'),
             'classes': ('collapse',)
         }),
-        ('Системная информация', {
+        ('System Information', {
             'fields': ('id', 'created_at', 'updated_at'),
             'classes': ('collapse',)
         }),

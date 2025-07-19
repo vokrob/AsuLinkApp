@@ -162,7 +162,7 @@ class RequestLoggingMiddleware(MiddlewareMixin):
             return response
         
         # Логируем ответ
-        status_emoji = "✅" if 200 <= response.status_code < 300 else "❌"
-        print(f"{status_emoji} API Response: {request.method} {request.path} - {response.status_code}")
+        status_text = "OK" if 200 <= response.status_code < 300 else "ERROR"
+        print(f"{status_text} API Response: {request.method} {request.path} - {response.status_code}")
         
         return response

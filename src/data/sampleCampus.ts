@@ -4,31 +4,31 @@ const sampleReviewAuthors: RoomReviewAuthor[] = [
   {
     id: 1,
     username: 'student_ivan',
-    full_name: 'Иван Петров'
+    full_name: 'Ivan Petrov'
   },
   {
     id: 2,
     username: 'maria_s',
-    full_name: 'Мария Сидорова'
+    full_name: 'Maria Sidorova'
   },
   {
     id: 3,
     username: 'alex_teacher',
-    full_name: 'Александр Николаевич'
+    full_name: 'Alexander Nikolaevich'
   },
   {
     id: 4,
     username: 'anna_k',
-    full_name: 'Анна Козлова'
+    full_name: 'Anna Kozlova'
   }
 ];
 
 export const sampleBuildings: Building[] = [
   {
     id: 'building-l',
-    name: 'Корпус Л',
-    address: 'пр. Ленина, 61, корпус Л',
-    description: 'Учебный корпус Института математики и информационных технологий. Современные аудитории, компьютерные классы, лаборатории.',
+    name: 'Building L',
+    address: 'Lenin Ave., 61, Building L',
+    description: 'Academic building of the Institute of Mathematics and Information Technology. Modern classrooms, computer labs, laboratories.',
     image: 'https://www.asu.ru/files/images/editor/campus/corpusl10.jpg',
     floors: 4,
     latitude: 53.3498,
@@ -38,9 +38,9 @@ export const sampleBuildings: Building[] = [
   },
   {
     id: 'building-s',
-    name: 'Корпус С',
-    address: 'пр. Ленина, 61, корпус С',
-    description: 'Главный учебный корпус университета. Административные службы, актовый зал, библиотека.',
+    name: 'Building S',
+    address: 'Lenin Ave., 61, Building S',
+    description: 'Main academic building of the university. Administrative services, assembly hall, library.',
     image: 'https://www.asu.ru/files/images/editor/campus/Campusc11.jpg',
     floors: 5,
     latitude: 53.3495,
@@ -50,9 +50,9 @@ export const sampleBuildings: Building[] = [
   },
   {
     id: 'building-d',
-    name: 'Корпус Д',
-    address: 'пр. Ленина, 61, корпус Д',
-    description: 'Корпус естественных наук. Лаборатории физики, химии, биологии. Современное научное оборудование.',
+    name: 'Building D',
+    address: 'Lenin Ave., 61, Building D',
+    description: 'Natural sciences building. Physics, chemistry, biology laboratories. Modern scientific equipment.',
     image: 'https://www.asu.ru/files/images/editor/campus/corpusd15.jpg',
     floors: 4,
     latitude: 53.3492,
@@ -62,9 +62,9 @@ export const sampleBuildings: Building[] = [
   },
   {
     id: 'building-m',
-    name: 'Корпус М',
-    address: 'пр. Ленина, 61, корпус М',
-    description: 'Медицинский корпус. Аудитории для изучения медицинских дисциплин, анатомический театр.',
+    name: 'Building M',
+    address: 'Lenin Ave., 61, Building M',
+    description: 'Medical building. Classrooms for medical disciplines, anatomy theater.',
     image: 'https://www.asu.ru/files/images/editor/40/40-32.jpg',
     floors: 3,
     latitude: 53.3500,
@@ -79,13 +79,13 @@ export const sampleRoomsCorpusL: Room[] = [
     id: 'room-l-101',
     number: '101',
     building: sampleBuildings[0],
-    building_name: 'Корпус Л',
+    building_name: 'Building L',
     floor: 1,
     room_type: 'lecture',
-    room_type_display: 'Лекционная аудитория',
+    room_type_display: 'Lecture Hall',
     capacity: 120,
-    description: 'Большая лекционная аудитория с современным мультимедийным оборудованием',
-    equipment: ['Проектор', 'Экран', 'Микрофон', 'Доска маркерная', 'Кондиционер'],
+    description: 'Large lecture hall with modern multimedia equipment',
+    equipment: ['Projector', 'Screen', 'Microphone', 'Whiteboard', 'Air Conditioning'],
     is_accessible: true,
     average_rating: 4.5,
     reviews_count: 23
@@ -94,13 +94,13 @@ export const sampleRoomsCorpusL: Room[] = [
     id: 'room-l-105',
     number: '105',
     building: sampleBuildings[0],
-    building_name: 'Корпус Л',
+    building_name: 'Building L',
     floor: 1,
     room_type: 'computer',
-    room_type_display: 'Компьютерный класс',
+    room_type_display: 'Computer Lab',
     capacity: 25,
-    description: 'Компьютерный класс для практических занятий по программированию',
-    equipment: ['25 компьютеров', 'Проектор', 'Интерактивная доска', 'Принтер', 'Сканер'],
+    description: 'Computer lab for practical programming classes',
+    equipment: ['25 computers', 'Projector', 'Interactive board', 'Printer', 'Scanner'],
     is_accessible: true,
     average_rating: 4.2,
     reviews_count: 18
@@ -109,13 +109,13 @@ export const sampleRoomsCorpusL: Room[] = [
     id: 'room-l-201',
     number: '201',
     building: sampleBuildings[0],
-    building_name: 'Корпус Л',
+    building_name: 'Building L',
     floor: 2,
     room_type: 'classroom',
-    room_type_display: 'Учебная аудитория',
+    room_type_display: 'Classroom',
     capacity: 40,
-    description: 'Стандартная учебная аудитория для семинарских занятий',
-    equipment: ['Проектор', 'Экран', 'Доска меловая', 'Парты'],
+    description: 'Standard classroom for seminars',
+    equipment: ['Projector', 'Screen', 'Chalkboard', 'Desks'],
     is_accessible: true,
     average_rating: 3.8,
     reviews_count: 15
@@ -124,13 +124,13 @@ export const sampleRoomsCorpusL: Room[] = [
     id: 'room-l-205',
     number: '205',
     building: sampleBuildings[0],
-    building_name: 'Корпус Л',
+    building_name: 'Building L',
     floor: 2,
     room_type: 'laboratory',
-    room_type_display: 'Лаборатория',
+    room_type_display: 'Laboratory',
     capacity: 20,
-    description: 'Лаборатория физики с современным оборудованием',
-    equipment: ['Лабораторные столы', 'Измерительные приборы', 'Микроскопы', 'Вытяжка'],
+    description: 'Physics laboratory with modern equipment',
+    equipment: ['Lab tables', 'Measuring instruments', 'Microscopes', 'Fume hood'],
     is_accessible: false,
     average_rating: 4.1,
     reviews_count: 12
@@ -139,13 +139,13 @@ export const sampleRoomsCorpusL: Room[] = [
     id: 'room-l-301',
     number: '301',
     building: sampleBuildings[0],
-    building_name: 'Корпус Л',
+    building_name: 'Building L',
     floor: 3,
     room_type: 'conference',
-    room_type_display: 'Конференц-зал',
+    room_type_display: 'Conference Room',
     capacity: 60,
-    description: 'Конференц-зал для проведения защит и научных мероприятий',
-    equipment: ['Проектор', 'Экран', 'Микрофоны', 'Видеокамера', 'Звуковая система'],
+    description: 'Conference room for thesis defenses and scientific events',
+    equipment: ['Projector', 'Screen', 'Microphones', 'Video camera', 'Sound system'],
     is_accessible: true,
     average_rating: 4.7,
     reviews_count: 31
@@ -197,19 +197,19 @@ export const sampleRoomsCorpusL: Room[] = [
   }
 ];
 
-// Аудитории корпуса С
+// Building S rooms
 export const sampleRoomsCorpusS: Room[] = [
   {
     id: 'room-s-101',
     number: '101',
     building: sampleBuildings[1],
-    building_name: 'Корпус С',
+    building_name: 'Building S',
     floor: 1,
     room_type: 'lecture',
-    room_type_display: 'Актовый зал',
+    room_type_display: 'Assembly Hall',
     capacity: 300,
-    description: 'Главный актовый зал университета для торжественных мероприятий',
-    equipment: ['Сцена', 'Световое оборудование', 'Звуковая система', 'Проекторы', 'Микрофоны'],
+    description: 'Main university assembly hall for ceremonial events',
+    equipment: ['Stage', 'Lighting equipment', 'Sound system', 'Projectors', 'Microphones'],
     is_accessible: true,
     average_rating: 4.7,
     reviews_count: 45
@@ -218,13 +218,13 @@ export const sampleRoomsCorpusS: Room[] = [
     id: 'room-s-201',
     number: '201',
     building: sampleBuildings[1],
-    building_name: 'Корпус С',
+    building_name: 'Building S',
     floor: 2,
     room_type: 'classroom',
-    room_type_display: 'Учебная аудитория',
+    room_type_display: 'Classroom',
     capacity: 50,
-    description: 'Просторная аудитория для лекций и семинаров',
-    equipment: ['Проектор', 'Экран', 'Доска маркерная', 'Парты', 'Кондиционер'],
+    description: 'Spacious classroom for lectures and seminars',
+    equipment: ['Projector', 'Screen', 'Whiteboard', 'Desks', 'Air Conditioning'],
     is_accessible: true,
     average_rating: 4.1,
     reviews_count: 28
@@ -233,13 +233,13 @@ export const sampleRoomsCorpusS: Room[] = [
     id: 'room-s-301',
     number: '301',
     building: sampleBuildings[1],
-    building_name: 'Корпус С',
+    building_name: 'Building S',
     floor: 3,
     room_type: 'conference',
-    room_type_display: 'Конференц-зал',
+    room_type_display: 'Conference Room',
     capacity: 40,
-    description: 'Зал для проведения конференций и деловых встреч',
-    equipment: ['Круглый стол', 'Проектор', 'Экран', 'Микрофоны', 'Видеосвязь'],
+    description: 'Room for conferences and business meetings',
+    equipment: ['Round table', 'Projector', 'Screen', 'Microphones', 'Video conferencing'],
     is_accessible: true,
     average_rating: 4.5,
     reviews_count: 16
@@ -252,7 +252,7 @@ export const sampleRoomReviews: RoomReview[] = [
     author: sampleReviewAuthors[0],
     rating: 5,
     category: 'general',
-    comment: 'Отличная аудитория! Современное оборудование, хорошая акустика. Удобные места.',
+    comment: 'Excellent classroom! Modern equipment, good acoustics. Comfortable seating.',
     created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
   },
@@ -261,7 +261,7 @@ export const sampleRoomReviews: RoomReview[] = [
     author: sampleReviewAuthors[1],
     rating: 4,
     category: 'equipment',
-    comment: 'Хорошее техническое оснащение, но иногда проблемы с проектором.',
+    comment: 'Good technical equipment, but sometimes issues with the projector.',
     created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
   },
@@ -270,7 +270,7 @@ export const sampleRoomReviews: RoomReview[] = [
     author: sampleReviewAuthors[2],
     rating: 4,
     category: 'comfort',
-    comment: 'Удобная аудитория для проведения лекций. Хорошая вентиляция.',
+    comment: 'Comfortable classroom for lectures. Good ventilation.',
     created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
   },
@@ -279,7 +279,7 @@ export const sampleRoomReviews: RoomReview[] = [
     author: sampleReviewAuthors[3],
     rating: 5,
     category: 'general',
-    comment: 'Превосходная аудитория! Все работает отлично, очень удобно проводить занятия.',
+    comment: 'Excellent classroom! Everything works perfectly, very convenient for conducting classes.',
     created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
   },
@@ -288,7 +288,7 @@ export const sampleRoomReviews: RoomReview[] = [
     author: sampleReviewAuthors[0],
     rating: 3,
     category: 'comfort',
-    comment: 'Аудитория неплохая, но стулья не очень удобные для длительных занятий.',
+    comment: 'The classroom is decent, but chairs are not very comfortable for long sessions.',
     created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
   },
@@ -297,7 +297,7 @@ export const sampleRoomReviews: RoomReview[] = [
     author: sampleReviewAuthors[1],
     rating: 5,
     category: 'equipment',
-    comment: 'Отличное оборудование! Компьютеры быстрые, все программы установлены.',
+    comment: 'Excellent equipment! Computers are fast, all software is installed.',
     created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
   }

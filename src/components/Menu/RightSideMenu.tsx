@@ -122,7 +122,7 @@ const RightSideMenu: React.FC<RightSideMenuProps> = ({
               onPress={onSettingsPress}
             >
               <Ionicons name="settings-outline" size={24} color={theme.text} />
-              <Text style={[styles.menuItemText, { color: theme.text }]}>Настройки</Text>
+              <Text style={[styles.menuItemText, { color: theme.text }]}>Settings</Text>
             </TouchableOpacity>
 
             <TouchableOpacity

@@ -8,36 +8,36 @@ import { testConnection, setAuthToken } from './src/services/api';
 import { loadData, KEYS } from './src/utils/storage';
 
 export default function App() {
-  // Автоматический тест соединения и загрузка токена при запуске приложения
+  // Automatic connection test and token loading on app startup
   useEffect(() => {
     const initializeApp = async () => {
-      console.log('🚀 Инициализация приложения...');
+      console.log('Initializing application...');
 
-      // Загружаем сохраненный токен
+      // Load saved token
       try {
         const savedToken = await loadData(KEYS.AUTH_TOKEN, null);
         if (savedToken) {
-          console.log('🔑 Загружен сохраненный токен аутентификации');
+          console.log('Loaded saved authentication token');
           setAuthToken(savedToken);
         } else {
-          console.log('ℹ️ Сохраненный токен не найден');
+          console.log('No saved token found');
         }
       } catch (error) {
-        console.error('❌ Ошибка при загрузке токена:', error);
+        console.error('Error loading token:', error);
       }
 
-      // Тестируем соединение с сервером
-      console.log('🔍 Автоматический тест соединения с сервером...');
+      // Test server connection
+      console.log('Automatic server connection test...');
       try {
         const isConnected = await testConnection();
         if (isConnected) {
-          console.log('✅ Соединение с сервером установлено!');
+          console.log('Server connection established!');
         } else {
-          console.log('❌ Не удалось подключиться к серверу');
-          console.log('🔧 Проверьте, что Django сервер запущен');
+          console.log('Failed to connect to server');
+          console.log('Check that Django server is running');
         }
       } catch (error) {
-        console.error('❌ Ошибка при тестировании соединения:', error);
+        console.error('Error testing connection:', error);
       }
     };
 

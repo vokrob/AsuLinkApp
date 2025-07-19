@@ -1,74 +1,39 @@
-# AsuLinkApp
+# <img src="assets/app-logo.png" width="32" align="top"> AsuLinkApp
 
-Mobile social network application for students and faculty of Altai State University.
+## Description
 
-## Technologies
+Mobile application for students and faculty of Altai State University. Enables communication, news viewing, event participation, and classroom finding.
 
-- **React Native 0.79.3** with TypeScript and Expo SDK 53
-- **Django 5.1.4** with SQLite and Django REST Framework
-- **Django Allauth** for authentication with email verification
+## Technology Stack
 
-## Installation
+- React Native with TypeScript
+- Django + SQLite
+- Django Allauth
 
-### Backend
+## Installation Instructions
+
+Backend setup:
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate  # Windows
+venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
-### Frontend
+Application setup:
 ```bash
 npm install
 npm start
 ```
 
-**Configuration:** Update IP address in `src/services/api.ts` for physical device testing.
+For testing on physical device, change IP in `src/services/api.ts`
 
-## Features
+## Usage Instructions
 
-- **Authentication** - registration with email verification, automatic role assignment
-- **News Feed** - posts with images, likes, comments
-- **Events** - event calendar with participation and reviews
-- **Campus Map** - buildings and rooms with rating system
-- **Messages** - chat between users
-- **Profiles** - different forms for students and faculty
-
-## Main API Endpoints
-
-- **Authentication**: `/api/auth/` - registration, login, verification
-- **Posts**: `/api/posts/` - creation, likes, comments
-- **Events**: `/api/events/` - calendar, participation, reviews
-- **Campus**: `/api/campus/` - buildings, rooms, ratings
-- **Profiles**: `/api/profile/` - user profile management
-
-## Role System
-
-- **Student** - assigned by default
-- **Faculty** - assigned automatically by email address
-
-```bash
-# Add faculty email
-python manage.py add_teacher_email teacher@asu.edu.ru --department "IT Department" --position "Associate Professor"
-```
-
-## Testing
-
-```bash
-# Backend
-cd backend
-python manage.py test
-
-# Frontend
-npm test
-```
-
-## Creating Test Data
-
-```bash
-python manage.py create_test_campus_data
-python manage.py create_test_events_data
-```
+1. Register and confirm email
+2. Complete student or faculty profile
+3. Browse news feed and create posts
+4. Participate in university events
+5. Use map to find classrooms

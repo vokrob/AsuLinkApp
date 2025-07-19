@@ -45,7 +45,7 @@ const EmailConfirmationScreen: React.FC<EmailConfirmationScreenProps> = ({ navig
             // Если email подтвержден, переходим на экран входа
             if (status.email_confirmed && status.can_login) {
                 Alert.alert(
-                    '✅ Email подтвержден!',
+                    'Email подтвержден!',
                     'Ваш email успешно подтвержден. Теперь вы можете войти в приложение.',
                     [
                         {
@@ -69,7 +69,7 @@ const EmailConfirmationScreen: React.FC<EmailConfirmationScreenProps> = ({ navig
             setIsLoading(true);
             await resendConfirmation(email);
             Alert.alert(
-                '📧 Письмо отправлено',
+                'Письмо отправлено',
                 'Новое письмо с подтверждением отправлено на ваш email. Проверьте почту.',
                 [{ text: 'OK' }]
             );
@@ -101,7 +101,7 @@ const EmailConfirmationScreen: React.FC<EmailConfirmationScreenProps> = ({ navig
 
             <View style={styles.middleContainer}>
                 <View style={styles.emailIcon}>
-                    <Text style={styles.emailIconText}>📧</Text>
+                    <Text style={styles.emailIconText}>@</Text>
                 </View>
 
                 <Text style={styles.mainMessage}>

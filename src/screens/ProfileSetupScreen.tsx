@@ -177,11 +177,11 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
             }
 
             // Сохраняем профиль локально
-            console.log('💾 Saving profile data...');
-            console.log(`👤 Роль: ${userRole} (${roleDisplay})`);
+            console.log('Saving profile data...');
+            console.log(`Роль: ${userRole} (${roleDisplay})`);
             const profileSaved = await saveData(KEYS.USER_PROFILE, profileData);
             if (!profileSaved) {
-                console.warn('⚠️ Failed to save profile to storage');
+                console.warn('Failed to save profile to storage');
             }
 
             // Переходим в главное приложение
@@ -232,24 +232,24 @@ const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ navigation, rou
                     source={require('../../assets/logo.png')}
                     style={styles.logo}
                 />
-                <Text style={styles.title1}>АЛТАЙСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ</Text>
-                <Text style={styles.title2}>ЗАПОЛНЕНИЕ ПРОФИЛЯ</Text>
-                <Text style={styles.title3}>ПРЕПОДАВАТЕЛЯ И СТУДЕНТА</Text>
+                <Text style={styles.title1}>ALTAI STATE UNIVERSITY</Text>
+                <Text style={styles.title2}>PROFILE SETUP</Text>
+                <Text style={styles.title3}>FOR FACULTY AND STUDENTS</Text>
             </View>
 
             <View style={styles.middleContainer}>
                 <Text style={styles.welcomeMessage}>
-                    Добро пожаловать в AsuLinkApp!
+                    Welcome to AsuLinkApp!
                 </Text>
 
                 {roleDisplay && (
                     <Text style={styles.roleInfo}>
-                        Ваша роль: {roleDisplay}
+                        Your role: {roleDisplay}
                     </Text>
                 )}
 
                 <Text style={styles.instructions}>
-                    Заполните основную информацию профиля для завершения регистрации
+                    Fill in basic profile information to complete registration
                 </Text>
 
                 {/* Общие поля */}

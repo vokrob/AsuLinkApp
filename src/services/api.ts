@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 const API_URL = 'http://192.168.1.73:8000/api';
 export const API_BASE_URL = API_URL;
 
-console.log(`🔗 API URL for ${Platform.OS}: ${API_URL}`);
+console.log(`API URL for ${Platform.OS}: ${API_URL}`);
 
 // Token storage
 let authToken: string | null = null;
@@ -93,22 +93,22 @@ export const register = async (userData: {
 // Функция проверки статуса email
 export const checkEmailStatus = async (email: string) => {
     try {
-        console.log('🔍 Проверка статуса email:', email);
+        console.log('Проверка статуса email:', email);
 
         const result = await makeApiRequest(`/auth/check-email-status/?email=${encodeURIComponent(email)}`, {
             method: 'GET'
         });
 
         if (result.success) {
-            console.log('✅ Статус email получен');
+            console.log('Статус email получен');
             return result.data;
         } else {
             const errorMessage = result.data?.error || 'Ошибка проверки статуса';
-            console.error('❌ Ошибка проверки статуса:', errorMessage);
+            console.error('Ошибка проверки статуса:', errorMessage);
             throw new Error(errorMessage);
         }
     } catch (error: any) {
-        console.error('❌ Критическая ошибка при проверке статуса:', error.message);
+        console.error('Критическая ошибка при проверке статуса:', error.message);
         throw new Error(error.message || 'Не удалось проверить статус email.');
     }
 };
@@ -218,7 +218,7 @@ export const sendEmailCode = async (email: string) => {
 // Функция проверки кода для Django Allauth регистрации
 export const verifyEmailCode = async (email: string, code: string) => {
     try {
-        console.log('🔍 Проверка кода верификации для Django Allauth:', code);
+        console.log('Проверка кода верификации для Django Allauth:', code);
 
         const result = await makeApiRequest('/auth/verify-code/', {
             method: 'POST',
@@ -226,15 +226,15 @@ export const verifyEmailCode = async (email: string, code: string) => {
         });
 
         if (result.success) {
-            console.log('✅ Код успешно подтвержден');
+            console.log('Код успешно подтвержден');
             return result.data;
         } else {
             const errorMessage = result.data?.error || 'Неверный код верификации';
-            console.error('❌ Ошибка проверки кода:', errorMessage);
+            console.error('Ошибка проверки кода:', errorMessage);
             throw new Error(errorMessage);
         }
     } catch (error: any) {
-        console.error('❌ Критическая ошибка при проверке кода:', error.message);
+        console.error('Критическая ошибка при проверке кода:', error.message);
         throw new Error(error.message || 'Не удалось проверить код. Попробуйте еще раз.');
     }
 };

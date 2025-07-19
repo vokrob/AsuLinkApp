@@ -60,7 +60,7 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar
-        title="Настройки"
+        title="Settings"
         onBackPress={() => navigation.goBack()}
         showBackButton={true}
       />

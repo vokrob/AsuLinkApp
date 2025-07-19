@@ -67,7 +67,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
           color: theme.text,
           borderColor: theme.border
         }]}
-        placeholder="Напишите новость..."
+        placeholder="Write news..."
         placeholderTextColor={theme.placeholderText}
         value={newsText}
         onChangeText={setNewsText}
@@ -81,7 +81,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
           onPress={pickImage}
         >
           <AntDesign name="picture" size={24} color={theme.primary} />
-          <Text style={{ marginLeft: 5, color: theme.primary }}>Фото</Text>
+          <Text style={{ marginLeft: 5, color: theme.primary }}>Photo</Text>
         </TouchableOpacity>
         {pickedImage && (
           <Image source={{ uri: pickedImage }} style={[styles.miniImage, {

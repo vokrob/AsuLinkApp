@@ -17,23 +17,23 @@ interface UserProfile {
   id: string;
   name: string;
   avatar: any;
-  // Поля для студентов
+  // Student fields
   faculty?: string;
   group?: string;
   course?: string;
-  // Поля для преподавателей
+  // Professor fields
   department?: string;
   position?: string;
-  // Общие поля
+  // Common fields
   email: string;
   role: 'student' | 'professor' | 'admin';
 }
 
 const DEFAULT_PROFILE: UserProfile = {
   id: '1',
-  name: 'Борков Данил Романович',
+  name: 'Danil Borkov',
   avatar: avatarImage,
-  faculty: 'Институт математики и информационных технологий',
+  faculty: 'Institute of Mathematics and Information Technology',
   group: '4.305-2',
   email: 'borkov.43052@asu.edu.ru',
   role: 'student'
@@ -154,7 +154,7 @@ const ProfileScreen = () => {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
       <HeaderBar
-        title="Профиль"
+        title="Profile"
         onMenuPress={toggleRightMenu}
         showMenuButton={true}
       />

@@ -320,7 +320,7 @@ def verify_email_code_step(request):
 
         # Проверяем код
         if verification_code.verify(code):
-            print(f"✅ Email {email} успешно подтвержден")
+            print(f"Email {email} успешно подтвержден")
 
             return Response({
                 'message': 'Email успешно подтвержден! Теперь заполните профиль.',
@@ -611,7 +611,7 @@ def verify_email_code(request):
             # Создаем токен для автоматического входа
             token, created = Token.objects.get_or_create(user=user)
 
-            print(f"✅ Email {email} успешно подтвержден")
+            print(f"Email {email} успешно подтвержден")
 
             return Response({
                 'message': 'Email успешно подтвержден!',
@@ -936,8 +936,8 @@ def allauth_register(request):
         # Отправляем email с кодом (вместо ссылки)
         send_verification_code(email, user)
 
-        print(f"📧 Письмо с кодом {verification_code.code} отправлено на: {email}")
-        print(f"👤 Пользователь создан: {username} (неактивен до подтверждения кода)")
+        print(f"Письмо с кодом {verification_code.code} отправлено на: {email}")
+        print(f"Пользователь создан: {username} (неактивен до подтверждения кода)")
 
         return Response({
             'message': 'Регистрация успешна! Код подтверждения отправлен на ваш email.',
@@ -950,7 +950,7 @@ def allauth_register(request):
         }, status=status.HTTP_201_CREATED)
 
     except Exception as e:
-        print(f"❌ Ошибка при регистрации: {str(e)}")
+        print(f"Ошибка при регистрации: {str(e)}")
         return Response(
             {'error': f'Ошибка сервера: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -1107,7 +1107,7 @@ def verify_allauth_code(request):
             # Создаем токен для автоматического входа
             token, created = Token.objects.get_or_create(user=user)
 
-            print(f"✅ Код подтвержден для {email}, пользователь активирован")
+            print(f"Код подтвержден для {email}, пользователь активирован")
 
             return Response({
                 'message': 'Email успешно подтвержден! Добро пожаловать в AsuLinkApp!',

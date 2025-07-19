@@ -52,27 +52,27 @@ const LoginScreen = ({ navigation }: any) => {
 
         if (!isLoginMode) {
             if (!email) {
-                newErrors.email = 'Email обязателен';
+                newErrors.email = 'Email is required';
             } else if (!validateEmail(email)) {
-                newErrors.email = 'Неверный формат email';
+                newErrors.email = 'Invalid email format';
             }
 
             if (!regUsername) {
-                newErrors.regUsername = 'Имя пользователя обязательно';
+                newErrors.regUsername = 'Username is required';
             } else if (regUsername.length < 3) {
-                newErrors.regUsername = 'Имя пользователя должно содержать минимум 3 символа';
+                newErrors.regUsername = 'Username must contain at least 3 characters';
             }
 
             if (!regPassword) {
-                newErrors.regPassword = 'Пароль обязателен';
+                newErrors.regPassword = 'Password is required';
             } else if (regPassword.length < 6) {
-                newErrors.regPassword = 'Пароль должен содержать минимум 6 символов';
+                newErrors.regPassword = 'Password must contain at least 6 characters';
             }
 
             if (!confirmPassword) {
-                newErrors.confirmPassword = 'Подтверждение пароля обязательно';
+                newErrors.confirmPassword = 'Password confirmation is required';
             } else if (regPassword !== confirmPassword) {
-                newErrors.confirmPassword = 'Пароли не совпадают';
+                newErrors.confirmPassword = 'Passwords do not match';
             }
         }
 
@@ -117,7 +117,7 @@ const LoginScreen = ({ navigation }: any) => {
             navigation.replace('Main');
 
         } catch (error: any) {
-            Alert.alert('Ошибка входа', error.message || 'Неправильное имя пользователя или пароль');
+            Alert.alert('Login Error', error.message || 'Incorrect username or password');
         } finally {
             setIsLoading(false);
         }
@@ -142,7 +142,7 @@ const LoginScreen = ({ navigation }: any) => {
 
             console.log('📧 Ответ сервера:', response);
 
-            // Проверяем, что регистрация прошла успешно и требуется подтверждение кода
+            // Check that registration was successful and code confirmation is required
             if (response.verification_code_sent || response.email_confirmation_sent || response.requires_verification) {
                 // Автоматически переходим на страницу подтверждения кода без показа сообщения
                 navigation.navigate('CodeVerification', {
@@ -153,8 +153,8 @@ const LoginScreen = ({ navigation }: any) => {
             } else {
                 // Fallback для старого формата
                 Alert.alert(
-                    'Регистрация завершена!',
-                    response.message || 'Проверьте вашу почту для подтверждения email.',
+                    'Registration Complete!',
+                    response.message || 'Check your email for email confirmation.',
                     [{ text: 'OK' }]
                 );
             }
@@ -164,11 +164,11 @@ const LoginScreen = ({ navigation }: any) => {
             let showCodeOption = false;
 
             if (error.message.includes('Network request failed')) {
-                errorMessage = 'Ошибка сети: Не удается подключиться к серверу. Проверьте подключение к интернету.';
-            } else if (error.message.includes('уже существует')) {
+                errorMessage = 'Network error: Unable to connect to server. Check your internet connection.';
+            } else if (error.message.includes('already exists')) {
                 errorMessage = error.message;
-            } else if (error.message.includes('Таймаут при регистрации') ||
-                error.message.includes('регистрация прошла успешно')) {
+            } else if (error.message.includes('Registration timeout') ||
+                error.message.includes('registration successful')) {
                 errorMessage = error.message;
                 showCodeOption = true;
             } else if (error.message) {
@@ -194,7 +194,7 @@ const LoginScreen = ({ navigation }: any) => {
     };
 
     const handleForgotPassword = () => {
-        Alert.alert('Восстановить пароль', 'Функция в разработке');
+        Alert.alert('Reset Password', 'Feature in development');
     };
 
 
@@ -202,7 +202,7 @@ const LoginScreen = ({ navigation }: any) => {
     const renderLoginForm = () => (
         <>
             <TextInput
-                placeholder="имя пользователя / email"
+                placeholder="username / email"
                 value={username}
                 onChangeText={setUsername}
                 style={[styles.input, errors.username && styles.inputError]}
@@ -212,7 +212,7 @@ const LoginScreen = ({ navigation }: any) => {
             {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
 
             <TextInput
-                placeholder="пароль"
+                placeholder="password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -243,12 +243,12 @@ const LoginScreen = ({ navigation }: any) => {
                 {isLoading ? (
                     <ActivityIndicator color="#fff" />
                 ) : (
-                    <Text style={styles.buttonText}>войти в систему</Text>
+                    <Text style={styles.buttonText}>login</Text>
                 )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleForgotPassword} disabled={isLoading}>
-                <Text style={styles.forgotPasswordText}>восстановить пароль</Text>
+                <Text style={styles.forgotPasswordText}>reset password</Text>
             </TouchableOpacity>
         </>
     );
@@ -267,7 +267,7 @@ const LoginScreen = ({ navigation }: any) => {
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
             <TextInput
-                placeholder="имя пользователя"
+                placeholder="username"
                 value={regUsername}
                 onChangeText={setRegUsername}
                 style={[styles.input, errors.regUsername && styles.inputError]}
@@ -277,7 +277,7 @@ const LoginScreen = ({ navigation }: any) => {
             {errors.regUsername && <Text style={styles.errorText}>{errors.regUsername}</Text>}
 
             <TextInput
-                placeholder="пароль"
+                placeholder="password"
                 value={regPassword}
                 onChangeText={setRegPassword}
                 secureTextEntry
@@ -287,7 +287,7 @@ const LoginScreen = ({ navigation }: any) => {
             {errors.regPassword && <Text style={styles.errorText}>{errors.regPassword}</Text>}
 
             <TextInput
-                placeholder="подтвердите пароль"
+                placeholder="confirm password"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
@@ -307,7 +307,7 @@ const LoginScreen = ({ navigation }: any) => {
                 {isLoading ? (
                     <ActivityIndicator color="#fff" />
                 ) : (
-                    <Text style={styles.buttonText}>зарегистрироваться</Text>
+                    <Text style={styles.buttonText}>register</Text>
                 )}
             </TouchableOpacity>
         </>
@@ -320,11 +320,11 @@ const LoginScreen = ({ navigation }: any) => {
                     source={require('../../assets/logo.png')}
                     style={styles.logo}
                 />
-                <Text style={styles.title1}>АЛТАЙСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ</Text>
+                <Text style={styles.title1}>ALTAI STATE UNIVERSITY</Text>
                 <Text style={styles.title2}>
-                    {isLoginMode ? 'ВХОД В ЛИЧНЫЙ КАБИНЕТ' : 'РЕГИСТРАЦИЯ'}
+                    {isLoginMode ? 'LOGIN TO PERSONAL ACCOUNT' : 'REGISTRATION'}
                 </Text>
-                <Text style={styles.title3}>ПРЕПОДАВАТЕЛЯ И СТУДЕНТА</Text>
+                <Text style={styles.title3}>FOR FACULTY AND STUDENTS</Text>
             </View>
 
             <View style={styles.middleContainer}>
@@ -341,7 +341,7 @@ const LoginScreen = ({ navigation }: any) => {
                         <Text style={[
                             styles.modeToggleText,
                             isLoginMode && styles.modeToggleTextActive
-                        ]}>Вход</Text>
+                        ]}>Login</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[
@@ -354,7 +354,7 @@ const LoginScreen = ({ navigation }: any) => {
                         <Text style={[
                             styles.modeToggleText,
                             !isLoginMode && styles.modeToggleTextActive
-                        ]}>Регистрация</Text>
+                        ]}>Registration</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -365,7 +365,7 @@ const LoginScreen = ({ navigation }: any) => {
             {!isLoginMode && (
                 <View style={styles.bottomContainer}>
                     <Text style={styles.hintText}>
-                        После регистрации на ваш email будет отправлено письмо с кодом подтверждения.
+                        After registration, an email with a confirmation code will be sent to your email.
                     </Text>
                 </View>
             )}
@@ -373,7 +373,7 @@ const LoginScreen = ({ navigation }: any) => {
             {isLoginMode && (
                 <View style={styles.bottomContainer}>
                     <Text style={styles.hintText}>
-                        Для восстановления пароля нажмите "восстановить пароль". На ваш email будет отправлена ссылка для сброса пароля.
+                        To reset your password, click "reset password". A password reset link will be sent to your email.
                     </Text>
                 </View>
             )}

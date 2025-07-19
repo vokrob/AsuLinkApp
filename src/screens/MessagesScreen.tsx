@@ -385,7 +385,7 @@ const MessagesScreen = () => {
               color: theme.text,
               borderColor: theme.border
             }]}
-            placeholder="Сообщение..."
+            placeholder="Message..."
             placeholderTextColor={theme.placeholderText}
             value={messageText}
             onChangeText={setMessageText}

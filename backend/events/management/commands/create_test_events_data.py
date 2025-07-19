@@ -11,13 +11,13 @@ class Command(BaseCommand):
     def handle(self, **options):
         self.stdout.write('Creating test events data...')
 
-        # Получаем или создаем пользователя-организатора
+        # Get or create organizer user
         organizer, created = User.objects.get_or_create(
             username='event_organizer',
             defaults={
                 'email': 'organizer@asu.ru',
-                'first_name': 'Организатор',
-                'last_name': 'Событий',
+                'first_name': 'Event',
+                'last_name': 'Organizer',
             }
         )
         if created:
@@ -25,7 +25,7 @@ class Command(BaseCommand):
             organizer.save()
             self.stdout.write(f'Created organizer user: {organizer.username}')
 
-        # Создаем события
+        # Create events
         events_data = [
             {
                 'title': 'День открытых дверей АлтГУ 2024',

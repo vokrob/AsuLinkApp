@@ -4,33 +4,33 @@ import uuid
 
 
 class Building(models.Model):
-    """Модель для корпусов университета"""
+    """Model for university buildings"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=100, verbose_name="Название корпуса")
-    address = models.CharField(max_length=200, verbose_name="Адрес")
-    description = models.TextField(blank=True, verbose_name="Описание")
-    image = models.ImageField(upload_to='buildings/', blank=True, null=True, verbose_name="Изображение")
-    floors = models.PositiveIntegerField(default=1, verbose_name="Количество этажей")
+    name = models.CharField(max_length=100, verbose_name="Building name")
+    address = models.CharField(max_length=200, verbose_name="Address")
+    description = models.TextField(blank=True, verbose_name="Description")
+    image = models.ImageField(upload_to='buildings/', blank=True, null=True, verbose_name="Image")
+    floors = models.PositiveIntegerField(default=1, verbose_name="Number of floors")
 
-    # Координаты для карты
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Широта")
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Долгота")
+    # Map coordinates
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Latitude")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Longitude")
 
-    # Системные поля
+    # System fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['name']
-        verbose_name = "Корпус"
-        verbose_name_plural = "Корпуса"
+        verbose_name = "Building"
+        verbose_name_plural = "Buildings"
 
     def __str__(self):
         return self.name
 
     @property
     def average_rating(self):
-        """Средний рейтинг всех аудиторий в корпусе"""
+        """Average rating of all rooms in the building"""
         rooms = self.rooms.all()
         if rooms:
             total_rating = sum(room.average_rating for room in rooms if room.average_rating > 0)
@@ -44,41 +44,41 @@ class Building(models.Model):
 
 
 class Room(models.Model):
-    """Модель для аудиторий"""
+    """Model for classrooms"""
     ROOM_TYPES = [
-        ('classroom', 'Аудитория'),
-        ('laboratory', 'Лаборатория'),
-        ('lecture', 'Лекционная'),
-        ('admin', 'Административная'),
-        ('library', 'Библиотека'),
-        ('computer', 'Компьютерный класс'),
-        ('conference', 'Конференц-зал'),
-        ('workshop', 'Мастерская'),
+        ('classroom', 'Classroom'),
+        ('laboratory', 'Laboratory'),
+        ('lecture', 'Lecture Hall'),
+        ('admin', 'Administrative'),
+        ('library', 'Library'),
+        ('computer', 'Computer Lab'),
+        ('conference', 'Conference Room'),
+        ('workshop', 'Workshop'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name='rooms', verbose_name="Корпус")
-    number = models.CharField(max_length=20, verbose_name="Номер аудитории")
-    floor = models.PositiveIntegerField(verbose_name="Этаж")
-    room_type = models.CharField(max_length=20, choices=ROOM_TYPES, default='classroom', verbose_name="Тип аудитории")
-    capacity = models.PositiveIntegerField(default=0, verbose_name="Вместимость")
-    description = models.TextField(blank=True, verbose_name="Описание")
+    building = models.ForeignKey(Building, on_delete=models.CASCADE, related_name='rooms', verbose_name="Building")
+    number = models.CharField(max_length=20, verbose_name="Room number")
+    floor = models.PositiveIntegerField(verbose_name="Floor")
+    room_type = models.CharField(max_length=20, choices=ROOM_TYPES, default='classroom', verbose_name="Room type")
+    capacity = models.PositiveIntegerField(default=0, verbose_name="Capacity")
+    description = models.TextField(blank=True, verbose_name="Description")
 
-    # Оборудование
-    equipment = models.JSONField(default=list, blank=True, verbose_name="Оборудование")
+    # Equipment
+    equipment = models.JSONField(default=list, blank=True, verbose_name="Equipment")
 
-    # Доступность
-    is_accessible = models.BooleanField(default=True, verbose_name="Доступна для использования")
+    # Accessibility
+    is_accessible = models.BooleanField(default=True, verbose_name="Available for use")
 
-    # Системные поля
+    # System fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['building', 'floor', 'number']
         unique_together = ('building', 'number')
-        verbose_name = "Аудитория"
-        verbose_name_plural = "Аудитории"
+        verbose_name = "Room"
+        verbose_name_plural = "Rooms"
 
     def __str__(self):
         return f"{self.building.name} - {self.number}"
@@ -96,47 +96,47 @@ class Room(models.Model):
 
 
 class RoomReview(models.Model):
-    """Модель для отзывов об аудиториях"""
+    """Model for room reviews"""
     RATING_CHOICES = [
-        (1, '1 - Очень плохо'),
-        (2, '2 - Плохо'),
-        (3, '3 - Удовлетворительно'),
-        (4, '4 - Хорошо'),
-        (5, '5 - Отлично'),
+        (1, '1 - Very Poor'),
+        (2, '2 - Poor'),
+        (3, '3 - Satisfactory'),
+        (4, '4 - Good'),
+        (5, '5 - Excellent'),
     ]
 
     REVIEW_CATEGORIES = [
-        ('cleanliness', 'Чистота'),
-        ('equipment', 'Оборудование'),
-        ('comfort', 'Комфорт'),
-        ('accessibility', 'Доступность'),
-        ('lighting', 'Освещение'),
-        ('acoustics', 'Акустика'),
-        ('temperature', 'Температура'),
-        ('general', 'Общее впечатление'),
+        ('cleanliness', 'Cleanliness'),
+        ('equipment', 'Equipment'),
+        ('comfort', 'Comfort'),
+        ('accessibility', 'Accessibility'),
+        ('lighting', 'Lighting'),
+        ('acoustics', 'Acoustics'),
+        ('temperature', 'Temperature'),
+        ('general', 'General Impression'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reviews')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='room_reviews')
-    rating = models.IntegerField(choices=RATING_CHOICES, verbose_name="Общая оценка")
-    category = models.CharField(max_length=20, choices=REVIEW_CATEGORIES, default='general', verbose_name="Категория отзыва")
-    comment = models.TextField(blank=True, verbose_name="Комментарий")
+    rating = models.IntegerField(choices=RATING_CHOICES, verbose_name="Overall rating")
+    category = models.CharField(max_length=20, choices=REVIEW_CATEGORIES, default='general', verbose_name="Review category")
+    comment = models.TextField(blank=True, verbose_name="Comment")
 
-    # Детальные оценки
-    cleanliness_rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True, verbose_name="Чистота")
-    equipment_rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True, verbose_name="Оборудование")
-    comfort_rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True, verbose_name="Комфорт")
+    # Detailed ratings
+    cleanliness_rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True, verbose_name="Cleanliness")
+    equipment_rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True, verbose_name="Equipment")
+    comfort_rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True, verbose_name="Comfort")
 
-    # Системные поля
+    # System fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('room', 'author')
         ordering = ['-created_at']
-        verbose_name = "Отзыв об аудитории"
-        verbose_name_plural = "Отзывы об аудиториях"
+        verbose_name = "Room Review"
+        verbose_name_plural = "Room Reviews"
 
     def __str__(self):
-        return f"Отзыв {self.author.username} на {self.room} - {self.rating}/5"
+        return f"Review by {self.author.username} for {self.room} - {self.rating}/5"

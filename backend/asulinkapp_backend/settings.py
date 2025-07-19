@@ -26,12 +26,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure--)hgd)#nuy%r2p3&pv8*^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Разрешенные хосты для разработки и продакшена
+# Allowed hosts for development and production
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '0.0.0.0',
-    '10.0.2.2',  # Android эмулятор
+    '10.0.2.2',  # Android emulator
 
     # Распространенные IP адреса локальных сетей
     '192.168.1.100',
@@ -40,7 +40,7 @@ ALLOWED_HOSTS = [
     '192.168.155.1',
     '10.0.0.100',
 
-    # В разработке разрешаем все хосты для удобства тестирования
+    # In development, allow all hosts for convenient testing
     '*' if DEBUG else 'your-production-domain.com'
 ]
 
@@ -177,9 +177,9 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS Configuration для физических устройств и эмуляторов
+# CORS Configuration for physical devices and emulators
 CORS_ALLOWED_ORIGINS = [
-    # Localhost для разработки
+    # Localhost for development
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:8081",
@@ -204,11 +204,11 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-# В разработке разрешаем все origins для удобства тестирования на физических устройствах
+# In development, allow all origins for convenient testing on physical devices
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
-# Дополнительные настройки CORS для мобильных устройств
-CORS_ALLOW_PRIVATE_NETWORK = True  # Разрешаем запросы из приватных сетей
+# Additional CORS settings for mobile devices
+CORS_ALLOW_PRIVATE_NETWORK = True  # Allow requests from private networks
 
 # Additional CORS settings for React Native
 CORS_ALLOW_HEADERS = [
@@ -229,44 +229,44 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Django Allauth настройки для стандартной email верификации
+# Django Allauth settings for standard email verification
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Можно входить по username или email
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Обязательная верификация email через ссылку
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # Подтверждение по GET запросу
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Can login with username or email
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Mandatory email verification via link
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # Confirmation via GET request
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False  # Не входить автоматически после подтверждения
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False  # Упрощаем форму регистрации
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3  # Ссылка действительна 3 дня
-ACCOUNT_EMAIL_CONFIRMATION_HMAC = True  # Более безопасные ссылки подтверждения
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Для разработки
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False  # Simplify registration form
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3  # Link valid for 3 days
+ACCOUNT_EMAIL_CONFIRMATION_HMAC = True  # More secure confirmation links
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # For development
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[AsuLinkApp] '
 
-# Настройки для мобильного приложения
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/email-confirmed/'  # Куда перенаправлять после подтверждения
+# Settings for mobile application
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/email-confirmed/'  # Where to redirect after confirmation
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/email-confirmed/'
 
 # Новый формат для ограничения попыток входа (Django Allauth 0.57+)
 ACCOUNT_RATE_LIMITS = {
-    'login_failed': '5/5m',  # 5 попыток за 5 минут
+    'login_failed': '5/5m',  # 5 attempts per 5 minutes
 }
 
-# Email настройки для Django Allauth
-# Для разработки можно использовать console backend или настроить реальный SMTP
+# Email settings for Django Allauth
+# For development, you can use console backend or configure real SMTP
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
-# SMTP настройки (для реальной отправки email)
+# SMTP settings (for real email sending)
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
     EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
     EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
     EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-    print(f"📧 Email: Настроен SMTP через {EMAIL_HOST}")
+    print(f"Email: Настроен SMTP через {EMAIL_HOST}")
 else:
-    print("📧 Email: Настроен вывод в консоль (разработка)")
+    print("Email: Настроен вывод в консоль (разработка)")
 
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='AsuLinkApp <noreply@asulinkapp.com>')
 

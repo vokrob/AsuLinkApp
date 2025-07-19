@@ -94,7 +94,7 @@
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn">
-                    ✅ Подтвердить Email
+                    Подтвердить Email
                 </button>
             </form>
         {% else %}
@@ -103,7 +103,7 @@
             </div>
             
             <a href="/api/auth/resend-confirmation/" class="btn">
-                📧 Отправить новое письмо
+                Отправить новое письмо
             </a>
         {% endif %}
         

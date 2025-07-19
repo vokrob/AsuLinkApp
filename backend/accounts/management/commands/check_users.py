@@ -4,26 +4,26 @@ from accounts.models import UserProfile, TeacherEmail
 
 
 class Command(BaseCommand):
-    help = 'Проверяет пользователей и их роли'
+    help = 'Check users and their roles'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.SUCCESS('👥 Проверка пользователей'))
-        
-        # Проверяем существующих пользователей
+        self.stdout.write(self.style.SUCCESS('Checking users'))
+
+        # Check existing users
         users = User.objects.all()
-        self.stdout.write(f'\n📊 Всего пользователей: {users.count()}')
-        
+        self.stdout.write(f'\nTotal users: {users.count()}')
+
         for user in users:
             if hasattr(user, 'profile'):
                 role_display = dict(UserProfile.ROLE_CHOICES).get(user.profile.role, user.profile.role)
-                self.stdout.write(f'   👤 {user.username} ({user.email}) → {role_display}')
+                self.stdout.write(f'   {user.username} ({user.email}) → {role_display}')
             else:
-                self.stdout.write(f'   👤 {user.username} ({user.email}) → Нет профиля')
-        
-        # Проверяем email преподавателей
+                self.stdout.write(f'   {user.username} ({user.email}) → No profile')
+
+        # Check teacher emails
         teacher_emails = TeacherEmail.objects.filter(is_active=True)
-        self.stdout.write(f'\n📧 Email преподавателей: {teacher_emails.count()}')
+        self.stdout.write(f'\nTeacher emails: {teacher_emails.count()}')
         for teacher in teacher_emails:
-            self.stdout.write(f'   📧 {teacher.email} ({teacher.department})')
-        
-        self.stdout.write(self.style.SUCCESS('\n✅ Проверка завершена'))
+            self.stdout.write(f'   {teacher.email} ({teacher.department})')
+
+        self.stdout.write(self.style.SUCCESS('\nCheck completed'))

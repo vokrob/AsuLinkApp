@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
             if created:
                 self.stdout.write(
-                    self.style.SUCCESS(f'✅ Добавлен email преподавателя: {email}')
+                    self.style.SUCCESS(f'Добавлен email преподавателя: {email}')
                 )
                 if department:
                     self.stdout.write(f'   Кафедра: {department}')
@@ -34,10 +34,10 @@ class Command(BaseCommand):
                     self.stdout.write(f'   Должность: {position}')
             else:
                 self.stdout.write(
-                    self.style.WARNING(f'⚠️ Email {email} уже существует в базе данных')
+                    self.style.WARNING(f'Email {email} уже существует в базе данных')
                 )
 
         except Exception as e:
             self.stdout.write(
-                self.style.ERROR(f'❌ Ошибка при добавлении email: {str(e)}')
+                self.style.ERROR(f'Ошибка при добавлении email: {str(e)}')
             )

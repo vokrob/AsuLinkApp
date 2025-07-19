@@ -240,7 +240,7 @@ const EventsScreen = () => {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom', 'left', 'right']}>
-      <HeaderBar title="События" onMenuPress={() => { }} />
+      <HeaderBar title="Events" onMenuPress={() => { }} />
 
 
 
@@ -258,7 +258,7 @@ const EventsScreen = () => {
           <Text style={[
             styles.viewModeText,
             { color: viewMode === 'list' ? 'white' : theme.secondaryText }
-          ]}>Список</Text>
+          ]}>List</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

@@ -89,10 +89,10 @@ const CodeVerificationScreen: React.FC<CodeVerificationScreenProps> = ({ navigat
 
         setIsLoading(true);
         try {
-            console.log('🔍 Проверка кода:', verificationCode);
+            console.log('Проверка кода:', verificationCode);
             const response = await verifyEmailCode(email, verificationCode);
-            
-            console.log('✅ Код подтвержден:', response);
+
+            console.log('Код подтвержден:', response);
 
             // Сохраняем токен и данные пользователя если они есть
             if (response.token) {

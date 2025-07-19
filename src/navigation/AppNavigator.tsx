@@ -72,7 +72,7 @@ const MainTabNavigatorContent = () => {
 
   const handleSupportPress = () => {
     setRightMenuVisible(false);
-    Alert.alert('Поддержка', 'Функция в разработке');
+    Alert.alert('Support', 'Feature in development');
   };
 
   return (
@@ -92,7 +92,7 @@ const MainTabNavigatorContent = () => {
         name="Feed"
         component={FeedScreen}
         options={{
-          tabBarLabel: 'Новости',
+          tabBarLabel: 'News',
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="home" size={size} color={color} />
           ),
@@ -102,7 +102,7 @@ const MainTabNavigatorContent = () => {
         name="Events"
         component={EventsScreen}
         options={{
-          tabBarLabel: 'События',
+          tabBarLabel: 'Events',
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="calendar" size={size} color={color} />
           ),
@@ -112,7 +112,7 @@ const MainTabNavigatorContent = () => {
         name="Messages"
         component={MessagesScreen}
         options={{
-          tabBarLabel: 'Сообщения',
+          tabBarLabel: 'Messages',
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="message1" size={size} color={color} />
           ),
@@ -122,7 +122,7 @@ const MainTabNavigatorContent = () => {
         name="Map"
         component={MapScreen}
         options={{
-          tabBarLabel: 'Карта',
+          tabBarLabel: 'Map',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="map-outline" size={size} color={color} />
           ),
@@ -132,7 +132,7 @@ const MainTabNavigatorContent = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Профиль',
+          tabBarLabel: 'Profile',
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="user" size={size} color={color} />
           ),

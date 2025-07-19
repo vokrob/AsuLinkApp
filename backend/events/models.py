@@ -6,48 +6,48 @@ import uuid
 
 
 class Event(models.Model):
-    """Модель для событий университета и личных событий"""
+    """Model for university and personal events"""
     EVENT_CATEGORIES = [
-        ('university', 'Университетское'),
-        ('personal', 'Личное'),
-        ('academic', 'Учебное'),
-        ('cultural', 'Культурное'),
-        ('sports', 'Спортивное'),
-        ('conference', 'Конференция'),
-        ('workshop', 'Мастер-класс'),
-        ('meeting', 'Встреча'),
-        ('exam', 'Экзамен'),
-        ('deadline', 'Дедлайн'),
+        ('university', 'University'),
+        ('personal', 'Personal'),
+        ('academic', 'Academic'),
+        ('cultural', 'Cultural'),
+        ('sports', 'Sports'),
+        ('conference', 'Conference'),
+        ('workshop', 'Workshop'),
+        ('meeting', 'Meeting'),
+        ('exam', 'Exam'),
+        ('deadline', 'Deadline'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200, verbose_name="Название")
-    description = models.TextField(blank=True, verbose_name="Описание")
-    category = models.CharField(max_length=20, choices=EVENT_CATEGORIES, default='university', verbose_name="Категория")
+    title = models.CharField(max_length=200, verbose_name="Title")
+    description = models.TextField(blank=True, verbose_name="Description")
+    category = models.CharField(max_length=20, choices=EVENT_CATEGORIES, default='university', verbose_name="Category")
 
-    # Время и место
-    start_datetime = models.DateTimeField(verbose_name="Дата и время начала")
-    end_datetime = models.DateTimeField(null=True, blank=True, verbose_name="Дата и время окончания")
-    location = models.CharField(max_length=200, blank=True, verbose_name="Место проведения")
+    # Time and location
+    start_datetime = models.DateTimeField(verbose_name="Start date and time")
+    end_datetime = models.DateTimeField(null=True, blank=True, verbose_name="End date and time")
+    location = models.CharField(max_length=200, blank=True, verbose_name="Location")
 
-    # Связи
-    organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organized_events', verbose_name="Организатор")
+    # Relations
+    organizer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organized_events', verbose_name="Organizer")
     participants = models.ManyToManyField(User, through='EventParticipant', related_name='events', blank=True)
-    related_post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name='events', verbose_name="Связанный пост")
+    related_post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name='events', verbose_name="Related post")
 
-    # Дополнительные поля
-    max_participants = models.PositiveIntegerField(null=True, blank=True, verbose_name="Максимум участников")
-    is_public = models.BooleanField(default=True, verbose_name="Публичное событие")
-    requires_registration = models.BooleanField(default=False, verbose_name="Требует регистрации")
+    # Additional fields
+    max_participants = models.PositiveIntegerField(null=True, blank=True, verbose_name="Maximum participants")
+    is_public = models.BooleanField(default=True, verbose_name="Public event")
+    requires_registration = models.BooleanField(default=False, verbose_name="Requires registration")
 
-    # Системные поля
+    # System fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['start_datetime']
-        verbose_name = "Событие"
-        verbose_name_plural = "События"
+        verbose_name = "Event"
+        verbose_name_plural = "Events"
 
     def __str__(self):
         return f"{self.title} - {self.start_datetime.strftime('%d.%m.%Y %H:%M')}"

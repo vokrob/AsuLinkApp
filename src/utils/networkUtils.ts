@@ -126,26 +126,26 @@ export const findWorkingApiUrl = async (
 }> => {
     const testedUrls: Array<{ url: string; result: any }> = [];
     
-    console.log(`🔍 Тестирование ${urls.length} URL...`);
-    
+    console.log(`Тестирование ${urls.length} URL...`);
+
     for (const url of urls) {
         console.log(`   Проверяю: ${url}`);
         const result = await testUrlConnection(url, timeout);
         testedUrls.push({ url, result });
-        
+
         if (result.success) {
-            console.log(`   ✅ Найден рабочий URL: ${url}`);
+            console.log(`   Найден рабочий URL: ${url}`);
             return {
                 success: true,
                 workingUrl: url,
                 testedUrls
             };
         } else {
-            console.log(`   ❌ ${url}: ${result.error}`);
+            console.log(`   ${url}: ${result.error}`);
         }
     }
-    
-    console.log('❌ Ни один URL не работает');
+
+    console.log('Ни один URL не работает');
     return {
         success: false,
         testedUrls
